@@ -9,29 +9,17 @@
 #define LEFT 1
 #define RIGHT 2
 
-const char* window_title = "GLFW Project 4";
-Cube * cube;
+const char* window_title = "184/284A Final Project";
 GLint shaderProgram;
-Skybox * sky;
 
 int obj_num,mouse_con;
 
 // On some systems you need to change this to the absolute path
-#define VERTEX_SHADER_PATH "shader.vert"
-#define FRAGMENT_SHADER_PATH "shader.frag"
 
-#define SKY_VERTEX_SHADER_PATH "skybox_shader.vert"
-#define SKY_FRAGMENT_SHADER_PATH "skybox_shader.frag"
+#define PART_VERT_SHADER_PATH "../Particle.vert"
+#define PART_FRAG_SHADER_PATH "../Particle.frag"
 
-
-#define BOX_VERT_SHADER_PATH "box_shader.vert"
-#define BOX_FRAG_SHADER_PATH "box_shader.frag"
-
-GLuint skybox_shaderProgram;
 GLuint particle_program;
-GLuint depth_program;
-GLuint plant_program;
-GLuint box_program;
 const double m_ROTSCALE = 90.0f;
 const double m_TRANSCALE = 2.0f;
 const double m_ZOOMSCALE = 0.5f;
@@ -42,7 +30,7 @@ bool debug, tooning, dof;
 // Default camera parameters
 //glm::vec3 Window::cam_pos(55.0f, 10.0f, 107.0f);		// e  | Position of camera
 //glm::vec3 Window::cam_look_at(0, 0.0f, 0.0f);	// d  | This is where the camera looks at
-glm::vec3 Window::cam_pos = { 8.0f, 40.0f, -40.0f };		// e  | Position of camera
+glm::vec3 Window::cam_pos = { 0.0f, 0.0f, -30.0f };		// e  | Position of camera
 glm::vec3 Window::cam_look_at = { 0.0f, 0.0f, 0.0f };	// d  | This is where the camera looks at
 glm::vec3 Window::cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 
@@ -56,67 +44,26 @@ glm::vec2 Window::mousePoint;
 glm::vec3 Window::lastPoint;
 int movement(NONE);
 
-char ox[100] = "C:\\Users\\Lingfeng\\Desktop\\CSE167StarterCode2-master\\Bull_Low_Poly.obj";
-char curtain[100] = "C:\\Users\\Lingfeng\\Desktop\\CSE167StarterCode2-master\\curtain3.obj";
-char land[100] = "C:\\Users\\Lingfeng\\Desktop\\CSE167StarterCode2-master\\box3.obj";
-char stone[100] = "C:\\Users\\Lingfeng\\Desktop\\CSE167StarterCode2-master\\stone.obj";
-glm::vec3 p00, p01, p02, p03, p11, p12, p13, p21, p22, p23, p31, p32, p33, p41, p42, p43;
 
-Plant * plant1 , * plant2, * plant3, *plant4, *plant5;
-std::vector<Plant *> field;
-Geometry* bull, *ground, *curtain_, * stone1, *stone2, *stone3, *stone4, *stone5;
-DoF* depth;
 int counter = 0;
 void Window::initialize_objects()
 {
-	sky = new Skybox();
-	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-	skybox_shaderProgram = LoadShaders(SKY_VERTEX_SHADER_PATH, SKY_FRAGMENT_SHADER_PATH);
-	box_program = LoadShaders(BOX_VERT_SHADER_PATH, BOX_FRAG_SHADER_PATH);
-    particle_program = LoadShaders("Particle.vert", "Particle.frag");
-	plant_program = LoadShaders("plantshader.vert", "plantshader.frag");
-	depth_program = LoadShaders("DoF.vert", "DoF.frag");
+
+    particle_program = LoadShaders("../Particle.vert", "../Particle.frag");
+
 	glm::mat4 toWorld(1.0f);
-	bull = new Geometry(ox, { 1.0f,0.7f,0.5f }, glm::vec3(0.0f, 0.0f, 0.0f), 1);
-	ground = new Geometry(land, { 0.95f,0.8f,0.7f },glm::vec3(0.0f,-3.0f,0.0f),0);
-	curtain_ = new Geometry(curtain, { 1.0f,0.2f,0.2f }, glm::vec3(0.0f, 0.0f, 270.0f), 1);
-	stone1 = new Geometry(stone, { 0.3f,0.3f,0.4f }, glm::vec3(20.0f, 0.0f, 220.0f), 1);
-	stone5 = new Geometry(stone, { 0.3f,0.3f,0.4f }, glm::vec3(-18.0f, 0.0f, 225.0f), 1);
-	stone2 = new Geometry(stone, { 0.3f,0.3f,0.4f }, glm::vec3(30.0f, 0.0f, 100.0f), 1);
-	stone3 = new Geometry(stone, { 0.3f,0.3f,0.4f }, glm::vec3(-20.0f, 0.0f, 110.0f), 1);
-	stone4 = new Geometry(stone, { 0.3f,0.3f,0.4f }, glm::vec3( 5.0f, 0.0f, 160.0f), 1);
+
 	debug = false;
 	pe = new Particles(particle_program);
-	depth = new DoF(depth_program);
-	plant1 = new Plant({ -26.0f,-1.0f, 60.0f }, "F-[+FX]+F[-XFX]+F[-FX]","FF", 45.0f, glm::vec3({ 0.15f,0.3f,0 }));
-	plant2 = new Plant({ 36.0f,-1.0f, 190.0f }, "F-[+FX]+F[-XFX]+F[-FX]", "FF", 45.0f, glm::vec3({ 0.15f,0.3f,0 }));
-	plant3 = new Plant({ 36.0f,-1.0f, 190.0f }, "F", "FF-[-FF+F]+[+F-F]", 50.0f, glm::vec3({ 0.05f,0.1f,0 }));
-	plant4 = new Plant({ 36.0f,-1.0f, 190.0f }, "F[-X][X]F[-X]+FX", "FF", 25.0f, "X");
 	tooning = true;
-	dof = true;
-	for (int i = 0; i < 5;i++) {
-		for (int j = 0; j < 5;j++) {
-			float x_val = (float)(rand() % 90 - 45);
-			float z_val = (float)(rand() % 30500-2000) / 100;
-			field.push_back(new Plant({ x_val,-1.0f, z_val }, "F[-X][X]F[-X]+FX", "FF", 25.0f, "X"));
-		}
-	}
-	for (int i = 0; i < 2;i++) {
-		for (int j = 0; j < 3;j++) {
-			float x_val = (float)(rand() % 90 - 45);
-			float z_val = (float)(rand() % 16000 - 3000)/100;
-			field.push_back(new Plant({ x_val,-1.0f, z_val }, "F", "FF-[-FF+F]+[+F-F]", 50.0f, glm::vec3({ 0.05f,0.1f,0 })));
-		}
-	}
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete(sky);
 	//delete(cube);
 	//glDeleteProgram(shaderProgram);
-	glDeleteProgram(skybox_shaderProgram);
+
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -185,74 +132,17 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	//curtain_->rotate();
-	int detector = bull->box->detectCollision(curtain_->box);
-	int detector2 = bull->box->detectCollision(stone1->box);
-	int detector3 = bull->box->detectCollision(stone2->box);
-	int detector4 = bull->box->detectCollision(stone3->box);
-	int detector5 = bull->box->detectCollision(stone4->box);
-	int detector6 = bull->box->detectCollision(stone5->box);
-	if (detector2 + detector3+ detector4+ detector5 + detector6 != 0) {
-		cam_pos = { 8.0f, 40.0f, -40.0f };		// e  | Position of camera
-		cam_look_at = { 0.0f, 0.0f, 0.0f };	// d  | This is where the camera looks at
-		bull->translate(-bull->offset);
-		pe->translation = { 0,0,0 };
-		std::cout << "collided~~~~" << std::endl;
-		//curtain_->translate(glm::vec3(0, 10, 0));
-	}
-	else if (detector == 1) {
-		bull->preset_color = { 1.0f,0.8f,0 };
-	}
-	else {
-		bull->box->color = { 0,0,0 };
-	}
 }
 
 void Window::display_callback(GLFWwindow* window)
 {
 	V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	glClearColor(0,0,0, 1.0);
-	if (dof) {
-		depth->bindFrameBuffer();
-	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// Clear the color and depth buffers
 	glUseProgram(particle_program);
 	pe->draw(particle_program);
 	// Use the shader of programID
-	glUseProgram(shaderProgram);
-	bull->draw(shaderProgram, tooning);
-	ground->draw(shaderProgram, tooning);
-	curtain_->draw(shaderProgram, tooning);
-	stone1->draw(shaderProgram, tooning);
-	stone2->draw(shaderProgram, tooning);
-	stone3->draw(shaderProgram, tooning);
-	stone4->draw(shaderProgram, tooning);
-	stone5->draw(shaderProgram, tooning);
-	if (debug) {
-		glUseProgram(box_program);
-		glLineWidth(1.0f);
-		stone1->box->draw(box_program);
-		stone2->box->draw(box_program);
-		stone3->box->draw(box_program);
-		stone4->box->draw(box_program);
-		stone5->box->draw(box_program);
-		bull->box->draw(box_program);
-		curtain_->box->draw(box_program);
-	}
-	glUseProgram(plant_program);
-	plant1->draw(plant_program);
-	plant2->draw(plant_program);
-	//plant4->draw(plant_program);
-	for (auto p : field) {
-		p->draw(plant_program);
-	}
-	glUseProgram(skybox_shaderProgram);
-	sky->draw(skybox_shaderProgram);
-	if (dof) {
-		depth->dof_post_processing(depth_program);
-	}
-
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 	// Swap buffers
@@ -269,47 +159,6 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-		if (key == GLFW_KEY_0) {
-			debug = !debug;
-		}
-		if (key == GLFW_KEY_U) {
-			depth->decrease_focus();
-		}
-		if (key == GLFW_KEY_I) {
-			depth->increase_focus();
-		}
-		if (key == GLFW_KEY_1) {
-			dof = !dof;
-		}
-		if (key == GLFW_KEY_2) {
-			tooning = !tooning;
-		}
-	}
-	if (action != GLFW_RELEASE) {
-		if (key == GLFW_KEY_A) {
-			cam_look_at += glm::vec3(1.0f, 0.0f, 0.0f);
-			cam_pos += glm::vec3(1.0f, 0.0f, 0.0f);
-			bull->translate(glm::vec3(1.0f, 0.0f, 0.0f));
-			pe->update(glm::vec3(1.0f, 0.0f, 0.0f));
-		}
-		if (key == GLFW_KEY_D) {
-			cam_look_at += glm::vec3(-1.0f, 0.0f, 0.0f);
-			cam_pos += glm::vec3(-1.0f, 0.0f, 0.0f);
-			bull->translate(glm::vec3(-1.0f, 0.0f, 0.0f));
-			pe->update(glm::vec3(-1.0f, 0.0f, 0.0f));
-		}
-		if (key == GLFW_KEY_W) {
-			cam_look_at += glm::vec3(0.0f, 0.0f, 1.0f);
-			cam_pos += glm::vec3(0.0f, 0.0f, 1.0f);
-			bull->translate(glm::vec3(0.0f, 0.0f, 1.0f));
-			pe->update(glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		if (key == GLFW_KEY_S) {
-			cam_look_at += glm::vec3(0.0f, 0.0f, -1.0f);
-			cam_pos += glm::vec3(0.0f, 0.0f, -1.0f);
-			bull->translate(glm::vec3(0.0f, 0.0f, -1.0f));
-			pe->update(glm::vec3(0.0f, 0.0f, -1.0f));
 		}
 	}
 }

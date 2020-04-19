@@ -31,7 +31,7 @@ public:
 	void update(glm::vec3 move);
 	/// better be called before swapping buffer
 	void draw(GLuint);
-	GLuint VertexArrayID, Texture;
+	GLuint Texture;
 	GLuint billboard_vertex_buffer;
 	GLuint particles_position_buffer;
 	GLuint particles_color_buffer;

@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Cube.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -27,28 +24,7 @@
     <ClInclude Include="..\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\skybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\packages\stb-master\stb_image.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Geometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Curve.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Particle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\BoundingBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\DoF.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Plant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -65,67 +41,16 @@
     <ClCompile Include="..\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Cube.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\skybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Geometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Curve.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Particle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\BoundingBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\DoF.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Plant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\shader.vert">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="packages.config" />
-    <None Include="..\skybox_shader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\skybox_shader.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\box_shader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\box_shader.vert">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="..\Particle.frag">
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\Particle.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\DoF.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\DoF.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\plantshader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\plantshader.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

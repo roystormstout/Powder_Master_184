@@ -10,7 +10,6 @@ struct Particle {
 	float size;
 	float life; // Remaining life of the particle. if < 0 : dead and unused.
 	float cameradistance;
-
 	bool operator<(Particle& that) {
 		// Sort in reverse order : far particles drawn first.
 		return this->cameradistance > that.cameradistance;
@@ -75,7 +74,7 @@ Particles::Particles(GLuint programID) {
 
 
 
-	 Texture = loadBMP_custom("particle.bmp");
+	 Texture = loadBMP_custom("../particle.bmp");
 
 	// The VBO containing the 4 vertices of the particles.
 	// Thanks to instancing, they will be shared by all particles.
@@ -120,25 +119,25 @@ void Particles::draw(GLuint programID) {
 
 	for (int i = 0; i<newparticles; i++) {
 		int particleIndex = FindUnusedParticle();
-		ParticlesContainer[particleIndex].life = ((rand() % 2000 - 1000.0f)/2000.f) + 1.5f; // This particle will live 5 seconds.
+		ParticlesContainer[particleIndex].life = ((rand() % 2000 - 1000.0f)/2000.f) + 2.5f; // This particle will live 5 seconds.
 		ParticlesContainer[particleIndex].pos = translation+glm::vec3(0, -1.1f, 1.5f);
 
 		float spread = 1.5f;
-		glm::vec3 maindir = glm::vec3(0.0f, 2.0f, -3.0f);
+		glm::vec3 maindir = glm::vec3(0.0f, 2.0f, 0.0f);
 		glm::vec3 randomdir = glm::vec3(
+			(rand() % 2000 - 1000.0f) / 500.0f,
 			(rand() % 2000 - 1000.0f) / 1000.0f,
-			(rand() % 2000 - 1000.0f) / 1000.0f,
-			(rand() % 2000 - 1000.0f) / 1000.0f
+			0.0f
 		);
 
 		ParticlesContainer[particleIndex].speed = maindir + randomdir * spread;
 
 
 		// Very bad way to generate a random color
-		ParticlesContainer[particleIndex].r = 225;
+		ParticlesContainer[particleIndex].r = rand() % 255;
 		ParticlesContainer[particleIndex].g = 190;
 		ParticlesContainer[particleIndex].b = 163;
-		ParticlesContainer[particleIndex].a = (rand() % 256)/2 + 100;
+		ParticlesContainer[particleIndex].a = 255;
 
 		ParticlesContainer[particleIndex].size = (rand() % 1000) / 4000.0f + 0.05f;
 
