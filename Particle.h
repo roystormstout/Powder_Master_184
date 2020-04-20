@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <random>
-
+#include "texture.h"
 
 class Particles {
 

@@ -1,7 +1,7 @@
 #pragma warning(disable : 4996)
 #include "Particle.h"
 #include "Window.h"
-#include "texture.cpp"
+
 #define MaxParticles 5000
 
 struct Particle {
@@ -269,12 +269,12 @@ void Particles::draw(GLuint programID) {
 	glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
 	glVertexAttribDivisor(2, 1); // color : one per quad                                  -> 1
 
-								 // Draw the particules !
-								 // This draws many times a small triangle_strip (which looks like a quad).
-								 // This is equivalent to :
-								 // for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4), 
-								 // but faster.
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
+	// Draw the particules !
+	// This draws many times a small triangle_strip (which looks like a quad).
+	// This is equivalent to :
+	// for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4), 
+	// but faster.
+	glDrawArraysInstanced(GL_QUADS, 0, 4, ParticlesCount);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);

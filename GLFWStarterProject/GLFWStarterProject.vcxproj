@@ -21,12 +21,14 @@
   <ItemGroup>
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\shader.h" />
+    <ClInclude Include="..\texture.h" />
     <ClInclude Include="..\Window.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\shader.cpp" />
+    <ClCompile Include="..\texture.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
