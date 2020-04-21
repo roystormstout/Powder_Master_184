@@ -19,13 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Camera.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\shader.h" />
+    <ClInclude Include="..\stb_image.h" />
     <ClInclude Include="..\texture.h" />
     <ClInclude Include="..\Window.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Camera.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\texture.cpp" />
