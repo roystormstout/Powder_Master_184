@@ -6,22 +6,21 @@
 
 #define LEFT 1
 #define RIGHT 2
-
 const char* window_title = "184/284A Final Project";
 
 Particles* pe;
 Scene* Window::scene = new Scene();
 
+
 void Scene::initialize_objects()
-{
-	camera = new Camera();
+{	camera = new Camera();
 	camera->SetAspect(width / height);
 	camera->Reset();
 	particleShader = new Shader(PART_VERT_SHADER_PATH, PART_FRAG_SHADER_PATH);
 
 	glm::mat4 toWorld(1.0f);
 
-	GLuint particleTexture = loadTexture("../resources/flame.png");
+	GLuint particleTexture = loadTexture("../resources/spark.png");
 	pe = new Particles(particleTexture, particleShader, { 0,0,0 });
 }
 
@@ -103,6 +102,8 @@ void Scene::resize_callback(GLFWwindow* window, int width, int height)
 void Scene::idle_callback()
 {
 	camera->Update();
+	//TODO: ADD PARTICLE PHYSICS UPDATE
+	pe->update();
 }
 
 void Scene::display_callback(GLFWwindow* window)
@@ -145,7 +146,8 @@ void Scene::mouse_button_callback(GLFWwindow* window, int button, int action, in
 		glfwGetCursorPos(window, &xpos, &ypos);
 		//printf("Cursor Position at %f: %f \n", xpos, ypos);
 		glm::vec3 new_dest = viewToWorldCoordTransform(xpos, ypos);
-		pe->update(new_dest);
+		//TODO: CHANGE FUNCTION NAME TO DISTANCE_UPDATE
+		pe->move_to(new_dest);
 	}
 }
 

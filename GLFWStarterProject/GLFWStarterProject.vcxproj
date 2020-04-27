@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Box2D.h" />
     <ClInclude Include="..\Camera.h" />
+    <ClInclude Include="..\GridNeighbor.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\stb_image.h" />
@@ -28,7 +30,9 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Box2D.cpp" />
     <ClCompile Include="..\Camera.cpp" />
+    <ClCompile Include="..\GridNeighbor.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\texture.cpp" />

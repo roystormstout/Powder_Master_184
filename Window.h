@@ -14,9 +14,10 @@
 #include "shader.h"
 #include "Particle.h"
 #include "Camera.h"
-
 #define PART_VERT_SHADER_PATH "../Particle.vert"
 #define PART_FRAG_SHADER_PATH "../Particle.frag"
+
+
 
 class Scene
 {

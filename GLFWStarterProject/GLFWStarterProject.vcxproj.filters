@@ -39,6 +39,12 @@
     <ClInclude Include="..\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Box2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GridNeighbor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -57,6 +63,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Box2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GridNeighbor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
