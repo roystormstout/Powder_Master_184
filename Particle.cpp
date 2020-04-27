@@ -92,7 +92,7 @@ void Particles::update(glm::vec3 move) {
 }
 
 void Particles::reinitParticle(Particle& p) {
-	p.life = 1.0f + (rand() % 2000) / 4000.0f;
+	p.life = 10.0f + (rand() % 2000) / 4000.0f;
 	p.pos = translation;
 
 	float spread = 3.0f;
@@ -148,8 +148,10 @@ void Particles::draw() {
 			p.life -= delta;
 			if (p.life > 0.0f) {
 
+				//TEMPORARY: fluid interaction test
+				p.speed += fluid->get_vel(p.pos[0], p.pos[1]);
 				// Simulate simple physics : gravity only, no collisions
-				p.speed += glm::vec3(0.0f, -4.81f, 0.0f) * (float)delta * 0.5f;
+				p.speed += glm::vec3(0.0f, -4.81f, 0.0f) * (float)delta * 0.1f;
 				p.pos += p.speed * (float)delta;
 				p.cameradistance = glm::length2(p.pos - Window::scene->camera->cam_pos);
 				//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
@@ -277,4 +279,9 @@ void Particles::draw() {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+}
+
+//TODO: this is kind of hacky, find a better way to expose fluid object
+void Particles::bind_fluid(Fluid* f) {
+	fluid = f;
 }

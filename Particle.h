@@ -22,6 +22,7 @@
 #include <random>
 #include "texture.h"
 #include "shader.h"
+#include "fluid.h"
 
 
 struct Particle {
@@ -41,12 +42,14 @@ class Particles {
 public:
 	Shader* shader;
 	glm::vec3 translation;
+	Fluid* fluid;
 	Particles(GLuint particleTexture, Shader* particleShader, glm::vec3 pos);
 	~Particles();
 	void update(glm::vec3 move);
 	/// better be called before swapping buffer
 	void draw();
 	void reinitParticle(Particle&);
+	void bind_fluid(Fluid* fluid);
 	GLuint Texture;
 	GLuint billboard_vertex_buffer;
 	GLuint particles_position_buffer;
