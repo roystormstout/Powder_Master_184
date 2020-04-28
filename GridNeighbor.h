@@ -24,9 +24,10 @@ public:
 	GridNeighbor(double part_size, double size);
 	~GridNeighbor(void) {};
 	void add_part( float x,float y, int part_index);
-	void assign_parts(Particle* parts, int num_parts, vector<bin_t>& grid, double bin_size);
+	void assign_parts(Particle* parts, int num_parts);
 	void remove_part(float x, float y, int part_index);
 	void calculate_lambda(Particle* parts);
 	void calculate_delta(Particle* parts);
+	void update_velocity(Particle* parts, float delta);
 };
 #endif

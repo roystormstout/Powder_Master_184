@@ -102,7 +102,6 @@ void Particles::move_to(glm::vec3 move) {
 
 void Particles::update() {
 	float delta = 0.016f;
-
 	////calculate #of new particles
 	//int newparticles = (int)(delta * 10000.0);
 	//if (newparticles > (int)(0.016f * 10000.0))
@@ -125,7 +124,7 @@ void Particles::update() {
 		Particle& p = ParticlesContainer[i]; // shortcut
 
 		if (p.life > delta) {
-				p.vel += glm::vec3(0.0f, -GRAVITY, 0.0f) * (float)delta;
+				p.vel += glm::vec3(0.0f, -GRAVITY, 0.0f) * (float)delta*0.5;
 				if (DEBUG)
 					cout << "index i : " << i << "vel " << " x " << p.vel.x << p.vel.y << endl;
 				p.new_pos = p.pos + p.vel * (float)delta;
@@ -137,7 +136,7 @@ void Particles::update() {
 		}
 	}
 
-	for (int i = 0; i < SOLVER_ITER; i++) {
+	for (int j = 0; j < SOLVER_ITER; j++) {
 		grid->calculate_lambda(ParticlesContainer);
 		grid->calculate_delta(ParticlesContainer);
 		for (int i = 0; i < MAX_PARTICLES; i++) {
@@ -148,12 +147,18 @@ void Particles::update() {
 			}
         }
 	}
-
+	grid->update_velocity(ParticlesContainer, delta);
+	//update vel and pos
 	ParticlesCount = 0;
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 		Particle& p = ParticlesContainer[i]; // shortcut
 		if (p.life > delta) {
-			p.vel = (p.new_pos - (p.pos))/delta;
+			//for bin moving
+			float old_x = p.pos.x;
+			float old_y = p.pos.y;
+			int old_bin_x = floor(p.pos.x + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
+			int old_bin_y = floor(p.pos.y + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
+
 			container->in_box(&p);
 			p.pos = p.new_pos;
 
@@ -174,7 +179,14 @@ void Particles::update() {
 			g_particule_color_data[4 * ParticlesCount + 3] = p.a;
 
 			ParticlesCount++;
+			// update bin assignment if necessary
+			int new_bin_x = floor(p.pos.x + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
+			int new_bin_y = floor(p.pos.y + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
 
+			if (new_bin_x != old_bin_x || new_bin_y != old_bin_y) {
+				grid->remove_part(old_x, old_y, i);
+				grid->add_part(p.pos.x, p.pos.y, i);
+			}
 		}
 	}
 	//cout << "pc" << ParticlesCount << endl;
@@ -198,14 +210,15 @@ void Particles::reinitParticle(Particle& p) {
 		(rand() % 2000 - 1000.0f) / 2000.0f,
 		0
 	);
-
-	p.vel = { 0,0,0 };
-
+	if(DEBUG)
+		p.vel = { 5.0f,0,0 };
+	else
+		p.vel = maindir + randomdir*spread;
 
 	// Very bad way to generate a random color
-	p.r = 225;
-	p.g = 190;
-	p.b = 163;
+	p.r = rand() % 120 + 134;
+	p.g = rand() % 255;
+	p.b = rand() % 120+134;
 	p.a = 255;
 
 	p.size = PARTICLE_SIZE;

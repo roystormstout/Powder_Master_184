@@ -8,6 +8,10 @@
 #endif
 
 #include <GLFW/glfw3.h>
+
+#include <cmath>
+#include <vector>
+#include <list>
 #include "glm/ext.hpp"
 
 #include <glm/mat4x4.hpp>
@@ -23,20 +27,23 @@
 #include "texture.h"
 #include "shader.h"
 
-#define DEBUG false
-#define TENSILE_INSTABILITY false
-#define MAX_PARTICLES 500
+#define DEBUG true
+#define TENSILE_INSTABILITY true
+#define VISCOSITY_EFFECT false
+#define MAX_PARTICLES 50
 #define PARTICLE_SIZE 0.5
 #define REST_DENSITY 500
 #define PI 3.14159265
 #define GRAVITY 9.8
-#define SOLVER_ITER 4
+#define SOLVER_ITER 3
 #define BOX_SIDE_LENGTH 10
+#define EPSILON 10000
 //for tensile instability
-#define CONST_K 0.1
+#define CONST_K 0.01
 #define CONST_N 4
 //delta q == 0.1*part_size
-#define DELTA_Q 0.05
+#define DELTA_Q 0.2
+#define CONST_C 0.01
 
 class GridNeighbor;
 class Box2D;
