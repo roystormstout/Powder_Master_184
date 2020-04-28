@@ -148,8 +148,10 @@ void Particles::draw() {
 			p.life -= delta;
 			if (p.life > 0.0f) {
 
-				//TEMPORARY: fluid interaction test
+				//TEMPORARY: fluid interaction
 				p.speed += fluid->get_vel(p.pos[0], p.pos[1]);
+
+
 				// Simulate simple physics : gravity only, no collisions
 				p.speed += glm::vec3(0.0f, -4.81f, 0.0f) * (float)delta * 0.1f;
 				p.pos += p.speed * (float)delta;

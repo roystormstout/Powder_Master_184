@@ -20,6 +20,7 @@ private:
 	int get_cell(int x, int y);
 	bool in_bounds(int x, int y);
 	void print_buffer(vector<float>& buf);
+	void apply_pressure(float dt);
 public:
 	Fluid(int width, int height) {
 		fluid_width = width / cell_size + 1;
@@ -28,9 +29,9 @@ public:
 		screen_height = height;
 		pressure.assign(fluid_width * fluid_height, 1.0);
 		xvel.assign(fluid_width * fluid_height, 0.1);
-		yvel.assign(fluid_width * fluid_height, 0.0);
+		yvel.assign(fluid_width * fluid_height, 0.1);
 	}
-	void update(float dx);
+	void update(float dt);
 	void debug();
 	void draw();
 	glm::vec3 get_vel(float x, float y);

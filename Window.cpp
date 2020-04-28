@@ -26,11 +26,6 @@ void Scene::initialize_objects()
 	pe = new Particles(particleTexture, particleShader, { 0,0,0 });
 	fluid = new Fluid(width, height);
 	pe->bind_fluid(fluid);
-
-	//TODO: remove debug
-	//fluid->debug();
-	fluid->update(0.1);
-	//fluid->debug();
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -122,7 +117,7 @@ void Scene::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	
 	pe->draw();
-	//fluid->update(0.01);
+	fluid->update(0.01);
 	// Use the shader of programID
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
