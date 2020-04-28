@@ -14,10 +14,12 @@
 #include "shader.h"
 #include "Particle.h"
 #include "Camera.h"
-#define PART_VERT_SHADER_PATH "../Particle.vert"
-#define PART_FRAG_SHADER_PATH "../Particle.frag"
+#include "Box2D.h"
+#define PART_VERT_SHADER_PATH "../shaders/Particle.vert"
+#define PART_FRAG_SHADER_PATH "../shaders/Particle.frag"
 
-
+#define BOX_VERT_SHADER_PATH "../shaders/BoxShader.vert"
+#define BOX_FRAG_SHADER_PATH "../shaders/BoxShader.frag"
 
 class Scene
 {
@@ -26,6 +28,8 @@ public:
 	 int width;
 	 int height;
 	 Shader * particleShader;
+	 Shader* boxShader;
+	 Box2D* container;
 	 glm::vec3 lastPoint;
 	 glm::vec2 mousePoint;
 	 void initialize_objects();

@@ -74,10 +74,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\Particle.frag">
+    <None Include="..\shaders\BoxShader.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Particle.vert">
+    <None Include="..\shaders\Particle.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\shaders\Particle.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\shaders\BoxShader.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

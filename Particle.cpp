@@ -41,8 +41,6 @@ int  Particles::findUnusedParticle() {
 
 Particles::Particles(GLuint particleTexture, Shader* particleShader, glm::vec3 pos) {
 	this->ParticlesCount = 0;
-	container = new Box2D({ BOX_SIDE_LENGTH / 2,BOX_SIDE_LENGTH / 2,0 }, { -BOX_SIDE_LENGTH / 2,-BOX_SIDE_LENGTH / 2,0 });
-
 	grid = new GridNeighbor(PARTICLE_SIZE, BOX_SIDE_LENGTH);
 	this->shader = particleShader;
 	translation = pos;
@@ -168,7 +166,7 @@ void Particles::update() {
 			int old_bin_x = floor(p.pos.x + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
 			int old_bin_y = floor(p.pos.y + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
 
-			container->in_box(&p);
+			Window::scene->container->in_box(&p);
 			p.pos = p.new_pos;
 
 			p.cameradistance = glm::length(p.pos - Window::scene->camera->cam_pos);
@@ -333,4 +331,5 @@ void Particles::draw() {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+
 }

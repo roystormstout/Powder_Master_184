@@ -17,11 +17,13 @@ void Scene::initialize_objects()
 	camera->SetAspect(width / height);
 	camera->Reset();
 	particleShader = new Shader(PART_VERT_SHADER_PATH, PART_FRAG_SHADER_PATH);
-
+	boxShader = new Shader(BOX_VERT_SHADER_PATH, BOX_FRAG_SHADER_PATH);
 	glm::mat4 toWorld(1.0f);
 
 	GLuint particleTexture = loadTexture("../resources/spark.png");
 	pe = new Particles(particleTexture, particleShader, { 0,0,0 });
+	container = new Box2D({ BOX_SIDE_LENGTH / 2,BOX_SIDE_LENGTH / 2,0 }, { -BOX_SIDE_LENGTH / 2,-BOX_SIDE_LENGTH / 2,0 }, boxShader);
+
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -115,6 +117,7 @@ void Scene::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	
 	pe->draw();
+	container->draw();
 	// Use the shader of programID
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();

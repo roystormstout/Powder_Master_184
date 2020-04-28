@@ -39,8 +39,10 @@
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Particle.frag" />
-    <None Include="..\Particle.vert" />
+    <None Include="..\shaders\BoxShader.frag" />
+    <None Include="..\shaders\BoxShader.vert" />
+    <None Include="..\shaders\Particle.frag" />
+    <None Include="..\shaders\Particle.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

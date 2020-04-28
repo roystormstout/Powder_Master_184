@@ -17,9 +17,11 @@ class Box2D {
 	//assume rectangular and axis aligned
 public:
 	 glm::vec3 max, min; //corners
-
+	 GLuint VBO, VAO, EBO;
+	 Shader* shader;
 	bool in_box(Particle*); //returns true if particle in container, else it reflects particle and returns false.
-	Box2D(glm::vec3, glm::vec3);
+	Box2D(glm::vec3, glm::vec3, Shader *);
+	void draw();
 	Box2D(void) {};
 	~Box2D(void) {};
 };

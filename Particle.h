@@ -45,6 +45,7 @@
 #define DELTA_Q 0.1
 #define CONST_C 0.01
 
+#define DRAW_RADIUS 0.01
 class GridNeighbor;
 class Box2D;
 //TODO: CHANGE IT TO A VIRTUAL CLASS AFTER THE FIRST MILESTONE
@@ -66,7 +67,6 @@ struct Particle {
 #pragma once
 class Particles {
 public:
-	Box2D* container;
 	GridNeighbor* grid;
 	Particle ParticlesContainer[MAX_PARTICLES];
 	Shader* shader;
