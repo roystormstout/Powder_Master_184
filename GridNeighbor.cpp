@@ -22,32 +22,34 @@ glm::vec3 deltaW(glm::vec3 r) {
 
 
 GridNeighbor::GridNeighbor(double part_size, double size) {
-	bin_size = part_size;
-	num_bins = ceil(size / bin_size);
+	//bin_size = part_size;
+	//num_bins = ceil(size / bin_size);
+    bin_size = size;
+    num_bins = 1;
 	grid.resize(num_bins * num_bins);
 }
 
 
 void GridNeighbor::add_part( float x, float y, int part_index) {
     // BUG: x and y may get closer to the wall than they should 
-    int bin_x = floor((x + (BOX_SIDE_LENGTH / 2)) / bin_size);
-    int bin_y = floor((y + (BOX_SIDE_LENGTH / 2)) / bin_size);
+    int bin_x = floor((x + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
+    int bin_y = floor((y + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
     grid[bin_x * num_bins + bin_y].push_back(part_index);
 }
 
 // called once to assign particles to bins
 void GridNeighbor::assign_parts(Particle* parts, int num_parts) {
     for (int i = 0; i < num_parts; ++i) {
-        int bin_x = (int)((parts[i].pos.x+ (BOX_SIDE_LENGTH / 2)) / bin_size);
-        int bin_y = (int)((parts[i].pos.y + (BOX_SIDE_LENGTH / 2)) / bin_size);
+        int bin_x = (int)((parts[i].pos.x+ (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
+        int bin_y = (int)((parts[i].pos.y + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
         grid[bin_x * num_bins + bin_y].push_back(i);
     }
 }
 
 // remove particle from the bin at grid[x][y]
 void GridNeighbor::remove_part(float x, float y, int part_index) {
-    int bin_x = floor((x + (BOX_SIDE_LENGTH / 2)) / bin_size);
-    int bin_y = floor((y + (BOX_SIDE_LENGTH / 2)) / bin_size);
+    int bin_x = floor((x + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
+    int bin_y = floor((y + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
     bin_t& vect = grid[bin_x * num_bins + bin_y];
     //for(int i=0; i<vect.size(); ++i){
     int i = 0;

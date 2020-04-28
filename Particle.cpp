@@ -90,6 +90,15 @@ Particles::Particles(GLuint particleTexture, Shader* particleShader, glm::vec3 p
 Particles::~Particles() {}
 
 void Particles::move_to(glm::vec3 move) {
+	if (move.x > BOX_SIDE_LENGTH/2.0f)
+		move.x = BOX_SIDE_LENGTH / 2.0001f;
+	else if(move.x < -BOX_SIDE_LENGTH / 2.0f)
+		move.x = -BOX_SIDE_LENGTH / 2.0f;
+	if (move.y > BOX_SIDE_LENGTH / 2.0f)
+		move.y = BOX_SIDE_LENGTH / 2.0001f;
+	else if (move.y < -BOX_SIDE_LENGTH / 2.0f)
+		move.y = -BOX_SIDE_LENGTH / 2.0f;
+
 	translation = move;
 	int particleIndex = findUnusedParticle();
 	if (particleIndex >= 0) {
@@ -162,7 +171,6 @@ void Particles::update() {
 			container->in_box(&p);
 			p.pos = p.new_pos;
 
-			p.life -= delta;
 			p.cameradistance = glm::length(p.pos - Window::scene->camera->cam_pos);
 			//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
 
@@ -188,6 +196,7 @@ void Particles::update() {
 				grid->add_part(p.pos.x, p.pos.y, i);
 			}
 		}
+		p.life -= delta;
 	}
 	//cout << "pc" << ParticlesCount << endl;
 
@@ -197,7 +206,7 @@ void Particles::update() {
 }
 
 void Particles::reinitParticle(Particle& p) {
-	p.life = 100.0f;
+	p.life = 30.0f;
 	p.pos = translation;
 	p.new_pos = translation;
 	p.delta = { 0,0,0 };
@@ -211,7 +220,7 @@ void Particles::reinitParticle(Particle& p) {
 		0
 	);
 	if(DEBUG)
-		p.vel = { 5.0f,0,0 };
+		p.vel = { 0,0,0 };
 	else
 		p.vel = maindir + randomdir*spread;
 
