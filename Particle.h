@@ -30,14 +30,16 @@
 #define DEBUG false
 #define TENSILE_INSTABILITY true
 #define VISCOSITY_EFFECT false
-#define MAX_PARTICLES 40
+//particle config
+#define MAX_PARTICLES 500
 #define PARTICLE_SIZE 0.5
-#define REST_DENSITY 250
+#define PARTICLE_LIFE 500
+#define REST_DENSITY 1000
 #define PI 3.14159265
 #define GRAVITY 9.8
 #define SOLVER_ITER 3
-#define BOX_SIDE_LENGTH 4
-#define EPSILON 700
+#define BOX_SIDE_LENGTH 6
+#define EPSILON 100
 //for tensile instability
 #define CONST_K 0.01
 #define CONST_N 4

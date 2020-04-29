@@ -204,7 +204,7 @@ void Particles::update() {
 }
 
 void Particles::reinitParticle(Particle& p) {
-	p.life = 30.0f;
+	p.life = PARTICLE_LIFE;
 	p.pos = translation;
 	p.new_pos = translation;
 	p.delta = { 0,0,0 };
