@@ -33,6 +33,7 @@ public:
 	 glm::vec3 lastPoint;
 	 glm::vec2 mousePoint;
 	 void initialize_objects();
+	 void initialize_UI(GLFWwindow* window);
 	 void clean_up();
 	 GLFWwindow* create_window(int width, int height);
 	 void resize_callback(GLFWwindow* window, int width, int height);
@@ -50,6 +51,7 @@ class Window
 public:
 	static Scene* scene;
 	static void initialize_objects() { scene->initialize_objects(); };
+	static void initialize_UI(GLFWwindow* window) { scene->initialize_UI(window); };
 	static void clean_up() { scene->clean_up(); };
 	static GLFWwindow* create_window(int width, int height) { return scene->create_window(width, height); };
 	static void resize_callback(GLFWwindow* window, int width, int height) { return scene->resize_callback(window, width, height); };

@@ -22,7 +22,9 @@
     <ClInclude Include="..\Box2D.h" />
     <ClInclude Include="..\Camera.h" />
     <ClInclude Include="..\GridNeighbor.h" />
+    <ClInclude Include="..\GUILayout.h" />
     <ClInclude Include="..\main.h" />
+    <ClInclude Include="..\NuklearInit.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\stb_image.h" />
     <ClInclude Include="..\texture.h" />

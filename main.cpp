@@ -83,6 +83,7 @@ int main(void)
 	// Initialize objects/pointers for rendering
 	Window::initialize_objects();
 
+	Window::initialize_UI(window);
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
 	{
