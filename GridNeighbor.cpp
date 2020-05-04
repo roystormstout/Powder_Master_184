@@ -14,7 +14,7 @@ float W(glm::vec3 r) {
 
 glm::vec3 deltaW(glm::vec3 r) {
     glm::vec3 multiplier{ 0,0,0 };
-    if (0.0f <= glm::length(r) && glm::length(r) <= PARTICLE_SIZE) {
+    if (0.0f < glm::length(r) && glm::length(r) <= PARTICLE_SIZE) {
         multiplier = (r / glm::length(r)) * pow(PARTICLE_SIZE - glm::length(r), 2.0f);
     }
     return (multiplier * (45.0f / (PI * pow(PARTICLE_SIZE, 6.0f))));
@@ -22,10 +22,14 @@ glm::vec3 deltaW(glm::vec3 r) {
 
 
 GridNeighbor::GridNeighbor(double part_size, double size) {
-	//bin_size = part_size;
-	//num_bins = ceil(size / bin_size);
-    bin_size = size;
-    num_bins = 1;
+    if (BINNING_OPTIMIZED) {
+        bin_size = part_size;
+        num_bins = ceil(size / bin_size);
+    }
+    else {
+        bin_size = size;
+        num_bins = 1;
+    }
 	grid.resize(num_bins * num_bins);
 }
 
@@ -34,6 +38,14 @@ void GridNeighbor::add_part( float x, float y, int part_index) {
     // BUG: x and y may get closer to the wall than they should 
     int bin_x = floor((x + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
     int bin_y = floor((y + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
+    if (bin_x >= num_bins)
+        bin_x = num_bins - 1;
+    else if (bin_x < 0)
+        bin_x = 0;
+    if (bin_y >= num_bins)
+        bin_y = num_bins - 1;
+    else if (bin_y < 0)
+        bin_y = 0;
     grid[bin_x * num_bins + bin_y].push_back(part_index);
 }
 
@@ -50,6 +62,14 @@ void GridNeighbor::assign_parts(Particle* parts, int num_parts) {
 void GridNeighbor::remove_part(float x, float y, int part_index) {
     int bin_x = floor((x + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
     int bin_y = floor((y + (BOX_SIDE_LENGTH / 2.0f)) / bin_size);
+    if (bin_x >= num_bins)
+        bin_x = num_bins - 1;
+    else if (bin_x < 0)
+        bin_x = 0;
+    if (bin_y >= num_bins)
+        bin_y = num_bins - 1;
+    else if (bin_y < 0)
+        bin_y = 0;
     bin_t& vect = grid[bin_x * num_bins + bin_y];
     //for(int i=0; i<vect.size(); ++i){
     int i = 0;
@@ -115,7 +135,7 @@ void GridNeighbor::calculate_lambda(Particle* parts) {
                             if (i != *cit) {
                                 glm::vec3 diff_ij = parts[i].new_pos - parts[*cit].new_pos;
                                 glm::vec3 x = deltaW(diff_ij);
-                                multiplier = -x;
+                                multiplier = x;
                                 multiplier_self += x;
                                 auto deltaC_i = multiplier * (1.0f / density_0);
                                 denom_sum += pow(glm::length(deltaC_i), 2);
@@ -197,6 +217,27 @@ void GridNeighbor::update_velocity(Particle* parts, float delta) {
             for (auto pi = bin.begin(); pi != bin.end(); ++pi) {
                 int i = *pi;
                 parts[i].vel = (parts[i].new_pos - (parts[i].pos)) / delta;
+                if (VORTICITY_EFFECT) {
+                    glm::vec3 omega({ 0,0,0 });
+                    for (int bi = top; bi <= bottom; ++bi) {
+                        for (int bj = left; bj <= right; ++bj) {
+                            bin_t& curr_bin = grid[bi * num_bins + bj];
+                            for (auto cit = curr_bin.begin(); cit != curr_bin.end(); ++cit) {
+                                if (i != *cit) {
+                                    glm::vec3 diff_ij = parts[i].new_pos - parts[*cit].new_pos;
+                                    glm::vec3 vel_diff = parts[*cit].vel - parts[i].vel;
+                                    omega += (vel_diff * deltaW(diff_ij));
+                                }
+                            }
+                        }
+                    }
+                    glm::vec3 eta({ glm::length(omega),glm::length(omega), glm::length(omega) });
+                    if (glm::length(eta) > 0) {
+                        glm::vec3 N = eta / glm::length(eta);
+                        parts[i].force += glm::cross(N, omega)/ EPSILON;
+                        cout << "force x " << parts[i].force.x << "  y  " << parts[i].force.y << endl;
+                    }
+                }
                 if (VISCOSITY_EFFECT) {
                     glm::vec3 new_vel_sum({ 0,0,0 });
                     for (int bi = top; bi <= bottom; ++bi) {

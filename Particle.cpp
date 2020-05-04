@@ -101,29 +101,14 @@ void Particles::move_to(glm::vec3 move) {
 	int particleIndex = findUnusedParticle();
 	if (particleIndex >= 0) {
 		Particle* p = &ParticlesContainer[particleIndex];
-		grid->remove_part(p->pos.x, p->pos.y, particleIndex);
+		//grid->remove_part(p->pos.x, p->pos.y, particleIndex);
 		reinitParticle(*p);
-		grid->add_part(p->pos.x, p->pos.y, particleIndex);
+		grid->add_part(move.x, move.y, particleIndex);
 	}
 }
 
 void Particles::update() {
 	float delta = 0.016f;
-	////calculate #of new particles
-	//int newparticles = (int)(delta * 10000.0);
-	//if (newparticles > (int)(0.016f * 10000.0))
-	//	newparticles = (int)(0.016f * 10000.0);
-	////reinitialize died/unused particles
-	//for (int i = 0; i < newparticles; i++) {
-	//	int particleIndex = findUnusedParticle();
-	//	if (particleIndex >= 0) {
-	//		Particle * p = &ParticlesContainer[particleIndex];
-	//		grid->remove_part(p->pos.x, p->pos.y, particleIndex);
-	//		reinitParticle(*p);
-	//		grid->add_part(p->pos.x, p->pos.y, particleIndex);
-	//	}
-
-	//}
 
 	// calculate initial new position
 	for (int i = 0; i < MAX_PARTICLES; i++) {
@@ -131,7 +116,7 @@ void Particles::update() {
 		Particle& p = ParticlesContainer[i]; // shortcut
 
 		if (p.life > delta) {
-				p.vel += glm::vec3(0.0f, -GRAVITY, 0.0f) * (float)delta*0.5;
+				p.vel += p.force * (float)delta;
 				if (DEBUG)
 					cout << "index i : " << i << "vel " << " x " << p.vel.x << p.vel.y << endl;
 				p.new_pos = p.pos + p.vel * (float)delta;
@@ -163,8 +148,8 @@ void Particles::update() {
 			//for bin moving
 			float old_x = p.pos.x;
 			float old_y = p.pos.y;
-			int old_bin_x = floor(p.pos.x + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
-			int old_bin_y = floor(p.pos.y + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
+			int old_bin_x = floor((p.pos.x + (BOX_SIDE_LENGTH / 2)) / grid->bin_size);
+			int old_bin_y = floor((p.pos.y + (BOX_SIDE_LENGTH / 2)) / grid->bin_size);
 
 			Window::scene->container->in_box(&p);
 			p.pos = p.new_pos;
@@ -186,8 +171,8 @@ void Particles::update() {
 
 			ParticlesCount++;
 			// update bin assignment if necessary
-			int new_bin_x = floor(p.pos.x + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
-			int new_bin_y = floor(p.pos.y + (BOX_SIDE_LENGTH / 2) / grid->bin_size);
+			int new_bin_x = floor((p.pos.x + (BOX_SIDE_LENGTH / 2)) / grid->bin_size);
+			int new_bin_y = floor((p.pos.y + (BOX_SIDE_LENGTH / 2)) / grid->bin_size);
 
 			if (new_bin_x != old_bin_x || new_bin_y != old_bin_y) {
 				grid->remove_part(old_x, old_y, i);
@@ -208,6 +193,7 @@ void Particles::reinitParticle(Particle& p) {
 	p.pos = translation;
 	p.new_pos = translation;
 	p.delta = { 0,0,0 };
+	p.force = { 0,-GRAVITY,0 };
 	p.lambda = 0;
 	p.mass = 1;
 	float spread = 3.0f;
@@ -237,15 +223,6 @@ void Particles::draw() {
 	//GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	
-
-	//printf("%d ",ParticlesCount);
-
-
-	// Update the buffers that OpenGL uses for rendering.
-	// There are much more sophisticated means to stream data from the CPU to the GPU, 
-	// but this is outside the scope of this tutorial.
-	// http://www.opengl.org/wiki/Buffer_Object_Streaming
 
 	auto programID = shader->ID;
 

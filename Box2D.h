@@ -11,6 +11,8 @@
 #include <GLFW/glfw3.h>
 #include <GL/glut.h>
 
+#define SURFACE_OFFSET 0.001
+#define FRICTION 0.5
 
 #pragma once
 class Box2D {

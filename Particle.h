@@ -28,23 +28,25 @@
 #include "shader.h"
 
 #define DEBUG false
+#define BINNING_OPTIMIZED true
 #define TENSILE_INSTABILITY true
-#define VISCOSITY_EFFECT false
+#define VORTICITY_EFFECT false
+#define VISCOSITY_EFFECT true
 //particle config
-#define MAX_PARTICLES 500
-#define PARTICLE_SIZE 0.5
+#define MAX_PARTICLES 300
+#define PARTICLE_SIZE 0.2
 #define PARTICLE_LIFE 500
-#define REST_DENSITY 1000
+#define REST_DENSITY 300
 #define PI 3.14159265
-#define GRAVITY 9.8
+#define GRAVITY 4.9
 #define SOLVER_ITER 3
-#define BOX_SIDE_LENGTH 6
-#define EPSILON 100
+#define BOX_SIDE_LENGTH 6.0f
+#define EPSILON 100.0f
 //for tensile instability
 #define CONST_K 0.01
 #define CONST_N 4
 //delta q == 0.1*part_size
-#define DELTA_Q 0.1
+#define DELTA_Q 0.02
 #define CONST_C 0.01
 
 #define DRAW_RADIUS 0.01
@@ -53,7 +55,7 @@ class Box2D;
 //TODO: CHANGE IT TO A VIRTUAL CLASS AFTER THE FIRST MILESTONE
 #pragma once
 struct Particle {
-	glm::vec3 pos, vel, new_pos,delta;
+	glm::vec3 pos, vel, new_pos,delta, force;
 	unsigned char r, g, b, a; // Color
 	float size;
 	float life; // Remaining life of the particle. if < 0 : dead and unused.
