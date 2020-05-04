@@ -141,7 +141,7 @@ void Scene::idle_callback()
 		framePassed = 0;
 		lastFPSTime += 1.0;
 	}
-	if (isSpawning && currentTime - lastSpawnTime >= 0.13f) {
+	if (isSpawning && currentTime - lastSpawnTime >= 0.2f) {
 		pe->move_to(cursorWorldPos);
 		lastSpawnTime = currentTime;
 	}
