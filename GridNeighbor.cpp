@@ -71,7 +71,6 @@ void GridNeighbor::remove_part(float x, float y, int part_index) {
     else if (bin_y < 0)
         bin_y = 0;
     bin_t& vect = grid[bin_x * num_bins + bin_y];
-    //for(int i=0; i<vect.size(); ++i){
     int i = 0;
     for (auto it = vect.begin(); it != vect.end() && i < vect.size(); ++it) {
         //if(vect[i] == part_index){

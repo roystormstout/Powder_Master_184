@@ -44,6 +44,10 @@ public:
 	 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 	 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 	 glm::vec3 viewToWorldCoordTransform(int mouse_x, int mouse_y);
+
+private:
+	double lastTime;
+	int framePassed;
 };
 
 class Window

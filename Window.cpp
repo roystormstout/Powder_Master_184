@@ -25,6 +25,8 @@ void Scene::initialize_objects()
 	pe = new Particles(particleTexture, particleShader, { 0,0,0 });
 	container = new Box2D({ BOX_SIDE_LENGTH / 2,BOX_SIDE_LENGTH / 2,0 }, { -BOX_SIDE_LENGTH / 2,-BOX_SIDE_LENGTH / 2,0 }, boxShader);
 
+	lastTime = glfwGetTime();
+	framePassed = 0;
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -126,6 +128,17 @@ void Scene::resize_callback(GLFWwindow* window, int width, int height)
 
 void Scene::idle_callback()
 {
+
+	double currentTime = glfwGetTime();
+	framePassed++;
+	if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+		// printf and reset timer
+		gui_status.fps = framePassed;
+		if(DEBUG)
+			printf("%f ms/frame\n", 1000.0 / double(framePassed));
+		framePassed = 0;
+		lastTime += 1.0;
+	}
 	camera->Update();
 	//TODO: ADD PARTICLE PHYSICS UPDATE
 	pe->update();

@@ -25,15 +25,28 @@ static void ui_statstics(struct nk_context *ctx, struct media *media,
 
 	string p_count_str = std::to_string(status.curr_parts);
 	const char* p_count_chars = p_count_str.c_str();
+	string fps_str = std::to_string(status.fps);
+	const char* fps_chars = fps_str.c_str();
 	if (nk_begin(ctx, "STATISTICS", nk_rect(10, 10, 300, 150),
 		NK_WINDOW_BORDER | NK_WINDOW_TITLE))
 	{
 		static const float lbratio[] = { 0.6f, 0.1f, 0.3f };  /* 0.3 + 0.4 + 0.3 = 1 */
-		nk_layout_row(ctx, NK_DYNAMIC, 45, 3, lbratio);
-		nk_label(ctx, "Particle Count: ", NK_TEXT_LEFT);
+		nk_layout_row(ctx, NK_DYNAMIC, 90, 3, lbratio);
+		if (nk_group_begin(ctx, "icons", NK_WINDOW_NO_SCROLLBAR)) { // column 1
+			nk_layout_row_static(ctx, 30, 180, 1);
+			nk_label(ctx, "FPS: ", NK_TEXT_LEFT);
+			nk_layout_row_static(ctx, 30, 180, 1);
+			nk_label(ctx, "Particle Count: ", NK_TEXT_LEFT);
+		}
+		nk_group_end(ctx);
 		nk_spacing(ctx, 1);
-		// username & points
-		nk_label(ctx, p_count_chars, NK_TEXT_CENTERED);
+		if (nk_group_begin(ctx, "nums", NK_WINDOW_NO_SCROLLBAR)) { // column 1
+			nk_layout_row_static(ctx, 30, 80, 1);
+			nk_label(ctx, fps_chars, NK_TEXT_CENTERED);
+			nk_layout_row_static(ctx, 30, 80, 1);
+			nk_label(ctx, p_count_chars, NK_TEXT_CENTERED);
+		}
+		nk_group_end(ctx);
 
 	}
 	nk_end(ctx);

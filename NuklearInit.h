@@ -47,6 +47,7 @@ struct media {
 
 struct guiStatus {
     int curr_parts;
+    int fps;
 };
 
 
