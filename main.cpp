@@ -22,6 +22,7 @@ void setup_callbacks()
 	glfwSetMouseButtonCallback(window, Window::mouse_button_callback);
 	// Set the scroll callback
 	glfwSetScrollCallback(window, Window::scroll_callback);
+
 }
 
 void setup_glew()

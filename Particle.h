@@ -36,10 +36,10 @@
 #define MAX_PARTICLES 300
 #define PARTICLE_SIZE 0.2
 #define PARTICLE_LIFE 500
-#define REST_DENSITY 300
+#define REST_DENSITY 1000
 #define PI 3.14159265
 #define GRAVITY 4.9
-#define SOLVER_ITER 3
+#define SOLVER_ITER 4
 #define BOX_SIDE_LENGTH 6.0f
 #define EPSILON 100.0f
 //for tensile instability

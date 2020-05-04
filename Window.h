@@ -46,8 +46,10 @@ public:
 	 glm::vec3 viewToWorldCoordTransform(int mouse_x, int mouse_y);
 
 private:
-	double lastTime;
+	double lastFPSTime, lastSpawnTime;
 	int framePassed;
+	bool isSpawning;
+	glm::vec3 cursorWorldPos;
 };
 
 class Window

@@ -25,7 +25,9 @@ void Scene::initialize_objects()
 	pe = new Particles(particleTexture, particleShader, { 0,0,0 });
 	container = new Box2D({ BOX_SIDE_LENGTH / 2,BOX_SIDE_LENGTH / 2,0 }, { -BOX_SIDE_LENGTH / 2,-BOX_SIDE_LENGTH / 2,0 }, boxShader);
 
-	lastTime = glfwGetTime();
+	lastFPSTime = glfwGetTime();
+	lastSpawnTime = glfwGetTime();
+	isSpawning = false;
 	framePassed = 0;
 }
 
@@ -131,16 +133,19 @@ void Scene::idle_callback()
 
 	double currentTime = glfwGetTime();
 	framePassed++;
-	if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+	if (currentTime - lastFPSTime >= 1.0) { // If last prinf() was more than 1 sec ago
 		// printf and reset timer
 		gui_status.fps = framePassed;
 		if(DEBUG)
 			printf("%f ms/frame\n", 1000.0 / double(framePassed));
 		framePassed = 0;
-		lastTime += 1.0;
+		lastFPSTime += 1.0;
+	}
+	if (isSpawning && currentTime - lastSpawnTime >= 0.13f) {
+		pe->move_to(cursorWorldPos);
+		lastSpawnTime = currentTime;
 	}
 	camera->Update();
-	//TODO: ADD PARTICLE PHYSICS UPDATE
 	pe->update();
 	gui_status.curr_parts = pe->ParticlesCount;
 }
@@ -186,19 +191,16 @@ void Scene::key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
+
 void Scene::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
-
-		// player moving
-		double xpos, ypos;
-		//getting cursor position
-		glfwGetCursorPos(window, &xpos, &ypos);
-		//printf("Cursor Position at %f: %f \n", xpos, ypos);
-		glm::vec3 new_dest = viewToWorldCoordTransform(xpos, ypos);
-		//TODO: CHANGE FUNCTION NAME TO DISTANCE_UPDATE
-		pe->move_to(new_dest);
+		isSpawning = true;
 	}
+	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		isSpawning = false;
+	}
+
 }
 
 // SCREEN SPACE: mouse_x and mouse_y are screen space
@@ -233,32 +235,12 @@ glm::vec3 Scene::viewToWorldCoordTransform(int mouse_x, int mouse_y) {
 }
 void Scene::cursor_movement_callback(GLFWwindow* window, double x, double y)
 {
-	// 
-	// Handle any necessary mouse movements
-	//
-	//glm::vec3 direction;
-	//float rot_angle;
-	//glm::vec3 curPoint;
-
-	//mousePoint = { x, y };
-	//if (movement == ROTATE) {
-	//	glm::vec2 point = glm::vec2(x, y);
-	//	curPoint = trackBallMapping(point); // Map the mouse position to a logical
-	//										// sphere location.
-	//	direction = curPoint - lastPoint;
-	//	float velocity = glm::length(direction);
-	//	if (velocity > 0.01) // If little movement - do nothing.
-	//	{
-	//		//get axis to rotate around
-	//		glm::vec3 rotAxis;
-	//		rotAxis = glm::cross(lastPoint, curPoint);
-	//		rot_angle = velocity * m_ROTSCALE;
-	//		float off = 0.3f;
-	//		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), rot_angle / 180.0f * glm::pi<float>(), rotAxis) * glm::vec4(cam_pos,1.0f));
-	//		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-	//	}
-	//}
-	//lastPoint = curPoint;
+	// player moving
+	double xpos, ypos;
+	//getting cursor position
+	glfwGetCursorPos(window, &xpos, &ypos);
+	//printf("Cursor Position at %f: %f \n", xpos, ypos);
+	cursorWorldPos = viewToWorldCoordTransform(xpos, ypos);
 }
 
 //resolved
