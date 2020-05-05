@@ -29,6 +29,7 @@ void Scene::initialize_objects()
 	lastSpawnTime = glfwGetTime();
 	isSpawning = false;
 	framePassed = 0;
+	type = water;
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -59,7 +60,12 @@ void Scene::initialize_UI(GLFWwindow* window) {
 	}
 	glfw.atlas.default_font = media.font_32;
 	nk_style_set_font(ctx, &(media.font_32->handle));
+	media.water[0] = icon_load("../resources/icons/water.png");
+	media.water[1] = icon_load("../resources/icons/water_highlighted.png");
+	media.rock[0] = icon_load("../resources/icons/rock.png");
+	media.rock[1] = icon_load("../resources/icons/rock_highlighted.png");
 	gui_status.curr_parts = 0;
+	gui_status.type = type;
 }
 
 GLFWwindow* Scene::create_window(int width, int height)
@@ -141,7 +147,7 @@ void Scene::idle_callback()
 		framePassed = 0;
 		lastFPSTime += 1.0;
 	}
-	if (isSpawning && currentTime - lastSpawnTime >= 0.2f) {
+	if (type == water && isSpawning && currentTime - lastSpawnTime >= 0.2f) {
 		pe->spawn_at(cursorWorldPos, { 0,255,255 }, { 0,-GRAVITY,0 },water);
 		lastSpawnTime = currentTime;
 	}
@@ -167,7 +173,7 @@ void Scene::display_callback(GLFWwindow* window)
 	/* GUI */
 
 
-	ui_statstics(ctx, &media, gui_status);
+	main_layout(ctx, &media, width, height, gui_status);
 
 	/* ----------------------------------------- */
 
@@ -188,19 +194,31 @@ void Scene::key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+		if (key == GLFW_KEY_Q)
+		{
+			type = water;
+			gui_status.type = water;
+		}
+		if (key == GLFW_KEY_W)
+		{
+			cout << "W pressed " << endl;
+			type = rock;
+			gui_status.type = rock;
+			isSpawning = false;
+		}
 	}
 }
 
 
 void Scene::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && type == water)
 	{
 		isSpawning = true;
 	}
-	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && isSpawning && type == water) {
 		isSpawning = false;
 	}
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && !isSpawning) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !isSpawning && type == rock) {
 		pe->spawn_at(cursorWorldPos, { 181,138,94}, { 0,0,0 }, rock);
 	}
 
@@ -232,7 +250,7 @@ glm::vec3 Scene::viewToWorldCoordTransform(int mouse_x, int mouse_y) {
 	realPos.y = cam_pos.y + n * dir.y;
 	realPos.z = 0;
 
-	printf("world pos remap to: %f %f %f\n", realPos.x, realPos.y, realPos.z);
+	//printf("world pos remap to: %f %f %f\n", realPos.x, realPos.y, realPos.z);
 
 	return realPos;
 }

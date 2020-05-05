@@ -32,6 +32,7 @@ public:
 	 Box2D* container;
 	 glm::vec3 lastPoint;
 	 glm::vec2 mousePoint;
+	 PART_TYPE type;
 	 void initialize_objects();
 	 void initialize_UI(GLFWwindow* window);
 	 void clean_up();
@@ -63,7 +64,7 @@ public:
 	static void resize_callback(GLFWwindow* window, int width, int height) { return scene->resize_callback(window, width, height); };
 	static void idle_callback() { return scene->idle_callback(); };
 	static void display_callback(GLFWwindow* window) { return scene->display_callback(window); };
-	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) { return scene->display_callback(window); };
+	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) { return scene->key_callback(window,key,scancode, action, mods); };
 	static void cursor_movement_callback(GLFWwindow* window, double x, double y) { return scene->cursor_movement_callback(window,x,y); };
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) { return scene->mouse_button_callback(window, button, action, mods); };
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) { return scene->scroll_callback(window, xoffset, yoffset); };

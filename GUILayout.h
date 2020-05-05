@@ -56,7 +56,53 @@ static void ui_statstics(struct nk_context *ctx, struct media *media,
 }
 
 
+static void ui_skills(struct nk_context* ctx, struct media* media, int width, int height, guiStatus status) {
+	static const char* key_bindings[] = { "Q","W" };
+	struct nk_style* s = &ctx->style;
+	nk_style_push_color(ctx, &s->window.background, nk_rgba(0, 0, 0, 0));
+	nk_style_push_style_item(ctx, &s->window.fixed_background, nk_style_item_color(nk_rgba(0, 0, 0, 0)));
+	nk_style_set_font(ctx, &(media->font_32->handle));
+	if (nk_begin(ctx, "skills", nk_rect(width * 0.3, height * 0.8, width * 0.4, height * 0.2),
+		NK_WINDOW_NO_SCROLLBAR))
+	{
+		static const float ratio[] = { 0.1f,0.3f, 0.2f,0.3f, 0.1f };  /* 0.3 + 0.4 + 0.3 = 1 */
+		nk_layout_row(ctx, NK_DYNAMIC, height * 0.2, 5, ratio);
+		nk_spacing(ctx, 1);
+		for (int i = 0; i < 2; i++) {
+			if (nk_group_begin(ctx, key_bindings[i], NK_WINDOW_NO_SCROLLBAR)) { // column 1
+				nk_layout_row_dynamic(ctx, width * 0.10, 1); // nested row
+				if (i == 0) {
+					if (status.type == water) {
+						nk_image(ctx, media->water[1]);
+					}
+					else {
+						nk_image(ctx, media->water[0]);
+					}
+				}
+				else if (i == 1) {
+					if (status.type == rock) {
+						nk_image(ctx, media->rock[1]);
+					}
+					else {
+						nk_image(ctx, media->rock[0]);
+					}
+				}
+				nk_layout_row_dynamic(ctx, 32, 1);
+				nk_text(ctx, key_bindings[i], strlen(key_bindings[i]), NK_TEXT_ALIGN_CENTERED);
+				nk_group_end(ctx);
+			}
+			nk_spacing(ctx, 1);
+		}
+
+	}
+	nk_end(ctx);
+	nk_style_set_font(ctx, &(glfw.atlas.default_font->handle));
+	nk_style_pop_color(ctx);
+	nk_style_pop_style_item(ctx);
+}
+
 static void
 main_layout(struct nk_context* ctx, struct media* media, int width, int height, guiStatus s) {
 	ui_statstics(ctx, media, s);
+	ui_skills(ctx, media, width, height, s);
 }

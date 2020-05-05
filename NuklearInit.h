@@ -43,11 +43,15 @@ struct media {
 	struct nk_font *font_64;
 	struct nk_font *font_128;
 	
+    //index 0 is normal, index 1 is highli
+    struct nk_image water[2];
+    struct nk_image rock[2];
 };
 
 struct guiStatus {
     int curr_parts;
     int fps;
+    PART_TYPE type;
 };
 
 
