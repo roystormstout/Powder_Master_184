@@ -22,6 +22,7 @@ void setup_callbacks()
 	glfwSetMouseButtonCallback(window, Window::mouse_button_callback);
 	// Set the scroll callback
 	glfwSetScrollCallback(window, Window::scroll_callback);
+
 }
 
 void setup_glew()
@@ -83,6 +84,7 @@ int main(void)
 	// Initialize objects/pointers for rendering
 	Window::initialize_objects();
 
+	Window::initialize_UI(window);
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
 	{

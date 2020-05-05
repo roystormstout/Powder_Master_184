@@ -1,28 +1,35 @@
 #include "Window.h"
-#define NONE 0
-#define ROTATE 1
-#define ZOOM 2
-#define TRANSLATE 3
+#include "GUILayout.h"
 
-#define LEFT 1
-#define RIGHT 2
+#define MAX_VERTEX_BUFFER 512 * 1024
+#define MAX_ELEMENT_BUFFER 128 * 1024
 
 const char* window_title = "184/284A Final Project";
 
 Particles* pe;
 Scene* Window::scene = new Scene();
+struct nk_context* ctx;
+struct nk_colorf bg = { 0.1f,0.1f,0.1f,1.0f };
+struct media media;
+struct guiStatus gui_status;
 
 void Scene::initialize_objects()
-{
-	camera = new Camera();
+{	camera = new Camera();
 	camera->SetAspect(width / height);
 	camera->Reset();
 	particleShader = new Shader(PART_VERT_SHADER_PATH, PART_FRAG_SHADER_PATH);
-
+	boxShader = new Shader(BOX_VERT_SHADER_PATH, BOX_FRAG_SHADER_PATH);
 	glm::mat4 toWorld(1.0f);
 
-	GLuint particleTexture = loadTexture("../resources/flame.png");
-	pe = new Particles(particleTexture, particleShader, { 0,0,0 });
+	GLuint particleTexture = loadTexture("../resources/spark.png");
+	pe = new Particles(particleTexture, particleShader);
+	container = new Box2D({ BOX_SIDE_LENGTH / 2,BOX_SIDE_LENGTH / 2,0 }, { -BOX_SIDE_LENGTH / 2,-BOX_SIDE_LENGTH / 2,0 }, boxShader);
+
+	lastFPSTime = glfwGetTime();
+	lastSpawnTime = glfwGetTime();
+	isSpawning = false;
+	framePassed = 0;
+	type = water;
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -32,6 +39,33 @@ void Scene::clean_up()
 
 	delete(particleShader);
 
+}
+
+void Scene::initialize_UI(GLFWwindow* window) {
+
+	ctx = nk_glfw3_init(window, NK_GLFW3_DEFAULT);
+	{const void* image; int w, h;
+	struct nk_font_config cfg = nk_font_config(0);
+	struct nk_font_atlas* atlas;
+	nk_glfw3_font_stash_begin(&atlas);
+	media.font_14 = nk_font_atlas_add_from_file(atlas, "../Nuklear/extra_font/monogram_extended.ttf", 14.0f, &cfg);
+	media.font_18 = nk_font_atlas_add_from_file(atlas, "../Nuklear/extra_font/monogram_extended.ttf", 18.0f, &cfg);
+	media.font_20 = nk_font_atlas_add_from_file(atlas, "../Nuklear/extra_font/monogram_extended.ttf", 20.0f, &cfg);
+	media.font_22 = nk_font_atlas_add_from_file(atlas, "../Nuklear/extra_font/monogram_extended.ttf", 22.0f, &cfg);
+	media.font_32 = nk_font_atlas_add_from_file(atlas, "../Nuklear/extra_font/monogram_extended.ttf", 32.0f, &cfg);
+	media.font_48 = nk_font_atlas_add_from_file(atlas, "../Nuklear/extra_font/monogram_extended.ttf", 48.0f, &cfg);
+	media.font_64 = nk_font_atlas_add_from_file(atlas, "../Nuklear/extra_font/monogram_extended.ttf", 64.0f, &cfg);
+	media.font_128 = nk_font_atlas_add_from_file(atlas, "../Nuklear/extra_font/monogram_extended.ttf", 128.0f, &cfg);
+	nk_glfw3_font_stash_end();
+	}
+	glfw.atlas.default_font = media.font_32;
+	nk_style_set_font(ctx, &(media.font_32->handle));
+	media.water[0] = icon_load("../resources/icons/water.png");
+	media.water[1] = icon_load("../resources/icons/water_highlighted.png");
+	media.rock[0] = icon_load("../resources/icons/rock.png");
+	media.rock[1] = icon_load("../resources/icons/rock_highlighted.png");
+	gui_status.curr_parts = 0;
+	gui_status.type = type;
 }
 
 GLFWwindow* Scene::create_window(int width, int height)
@@ -102,21 +136,49 @@ void Scene::resize_callback(GLFWwindow* window, int width, int height)
 
 void Scene::idle_callback()
 {
+
+	double currentTime = glfwGetTime();
+	framePassed++;
+	if (currentTime - lastFPSTime >= 1.0) { // If last prinf() was more than 1 sec ago
+		// printf and reset timer
+		gui_status.fps = framePassed;
+		if(DEBUG)
+			printf("%f ms/frame\n", 1000.0 / double(framePassed));
+		framePassed = 0;
+		lastFPSTime += 1.0;
+	}
+	if (type == water && isSpawning && currentTime - lastSpawnTime >= 0.2f) {
+		pe->spawn_at(cursorWorldPos, { 0,255,255 }, { 0,-GRAVITY,0 },water);
+		lastSpawnTime = currentTime;
+	}
 	camera->Update();
+	pe->update();
+	gui_status.curr_parts = pe->ParticlesCount;
 }
 
 void Scene::display_callback(GLFWwindow* window)
 {
 	auto vpMatrix = camera->GetViewProjectMtx();
 
-	glClearColor(0,0,0, 1.0);
+	glClearColor(0.3, 0.3, 0.3, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// Clear the color and depth buffers
 	
 	pe->draw();
+	container->draw();
 	// Use the shader of programID
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
+	nk_glfw3_new_frame();
+	/* GUI */
+
+
+	main_layout(ctx, &media, width, height, gui_status);
+
+	/* ----------------------------------------- */
+
+
+	nk_glfw3_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
 	// Swap buffers
 	glfwSwapBuffers(window);
 }
@@ -132,21 +194,34 @@ void Scene::key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+		if (key == GLFW_KEY_Q)
+		{
+			type = water;
+			gui_status.type = water;
+		}
+		if (key == GLFW_KEY_W)
+		{
+			cout << "W pressed " << endl;
+			type = rock;
+			gui_status.type = rock;
+			isSpawning = false;
+		}
 	}
 }
 
-void Scene::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-	{
 
-		// player moving
-		double xpos, ypos;
-		//getting cursor position
-		glfwGetCursorPos(window, &xpos, &ypos);
-		//printf("Cursor Position at %f: %f \n", xpos, ypos);
-		glm::vec3 new_dest = viewToWorldCoordTransform(xpos, ypos);
-		pe->update(new_dest);
+void Scene::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && type == water)
+	{
+		isSpawning = true;
 	}
+	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && isSpawning && type == water) {
+		isSpawning = false;
+	}
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !isSpawning && type == rock) {
+		pe->spawn_at(cursorWorldPos, { 181,138,94}, { 0,0,0 }, rock);
+	}
+
 }
 
 // SCREEN SPACE: mouse_x and mouse_y are screen space
@@ -175,38 +250,18 @@ glm::vec3 Scene::viewToWorldCoordTransform(int mouse_x, int mouse_y) {
 	realPos.y = cam_pos.y + n * dir.y;
 	realPos.z = 0;
 
-	printf("world pos remap to: %f %f %f\n", realPos.x, realPos.y, realPos.z);
+	//printf("world pos remap to: %f %f %f\n", realPos.x, realPos.y, realPos.z);
 
 	return realPos;
 }
 void Scene::cursor_movement_callback(GLFWwindow* window, double x, double y)
 {
-	// 
-	// Handle any necessary mouse movements
-	//
-	//glm::vec3 direction;
-	//float rot_angle;
-	//glm::vec3 curPoint;
-
-	//mousePoint = { x, y };
-	//if (movement == ROTATE) {
-	//	glm::vec2 point = glm::vec2(x, y);
-	//	curPoint = trackBallMapping(point); // Map the mouse position to a logical
-	//										// sphere location.
-	//	direction = curPoint - lastPoint;
-	//	float velocity = glm::length(direction);
-	//	if (velocity > 0.01) // If little movement - do nothing.
-	//	{
-	//		//get axis to rotate around
-	//		glm::vec3 rotAxis;
-	//		rotAxis = glm::cross(lastPoint, curPoint);
-	//		rot_angle = velocity * m_ROTSCALE;
-	//		float off = 0.3f;
-	//		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), rot_angle / 180.0f * glm::pi<float>(), rotAxis) * glm::vec4(cam_pos,1.0f));
-	//		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-	//	}
-	//}
-	//lastPoint = curPoint;
+	// player moving
+	double xpos, ypos;
+	//getting cursor position
+	glfwGetCursorPos(window, &xpos, &ypos);
+	//printf("Cursor Position at %f: %f \n", xpos, ypos);
+	cursorWorldPos = viewToWorldCoordTransform(xpos, ypos);
 }
 
 //resolved

@@ -1,9 +1,8 @@
 #pragma warning(disable : 4996)
 #include "Particle.h"
 #include "Window.h"
-
-#define MaxParticles 50
-
+#include "Box2D.h"
+#include "GridNeighbor.h"
 
 static GLfloat g_vertex_buffer_data[] = {
 	-0.5f, -0.5f, 0.0f,
@@ -11,20 +10,15 @@ static GLfloat g_vertex_buffer_data[] = {
 	-0.5f,  0.5f, 0.0f,
 	0.5f,  0.5f, 0.0f,
 };
-static GLfloat* g_particule_position_size_data = new GLfloat[MaxParticles * 4];
-static GLubyte* g_particule_color_data = new GLubyte[MaxParticles * 4];
+static GLfloat* g_particule_position_size_data = new GLfloat[MAX_PARTICLES * 4];
+static GLubyte* g_particule_color_data = new GLubyte[MAX_PARTICLES * 4];
 
 int LastUsedParticle = 0;
-Particle ParticlesContainer[MaxParticles];
-void SortParticles() {
-	std::sort(&ParticlesContainer[0], &ParticlesContainer[MaxParticles]);
-}
-int newparticles = 100;
-// Finds a Particle in ParticlesContainer which isn't used yet.
-// (i.e. life < 0);
-int FindUnusedParticle() {
 
-	for (int i = LastUsedParticle; i<MaxParticles; i++) {
+
+int  Particles::findUnusedParticle() {
+
+	for (int i = LastUsedParticle; i< MAX_PARTICLES; i++) {
 		if (ParticlesContainer[i].life < 0) {
 			LastUsedParticle = i;
 			return i;
@@ -38,12 +32,14 @@ int FindUnusedParticle() {
 		}
 	}
 
-	return -1; // All particles are taken, override the first one
+	return -1; // All particles are taken, failed to create new particles
 }
 
-Particles::Particles(GLuint particleTexture, Shader* particleShader, glm::vec3 pos) {
+Particles::Particles(GLuint particleTexture, Shader* particleShader) {
+	this->ParticlesCount = 0;
+	grid = new GridNeighbor(PARTICLE_SIZE, BOX_SIDE_LENGTH);
 	this->shader = particleShader;
-	translation = pos;
+	translation = { 0,0,0 };
 	// Create and compile our GLSL program from the shaders
 	auto programID = shader->ID;
 	// Vertex shader
@@ -55,10 +51,10 @@ Particles::Particles(GLuint particleTexture, Shader* particleShader, glm::vec3 p
 	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 
 
-	static GLfloat* g_particule_position_size_data = new GLfloat[MaxParticles * 4];
-	static GLubyte* g_particule_color_data = new GLubyte[MaxParticles * 4];
+	static GLfloat* g_particule_position_size_data = new GLfloat[MAX_PARTICLES * 4];
+	static GLubyte* g_particule_color_data = new GLubyte[MAX_PARTICLES * 4];
 
-	for (int i = 0; i<MaxParticles; i++) {
+	for (int i = 0; i< MAX_PARTICLES; i++) {
 		ParticlesContainer[i].life = -1.0f;
 		ParticlesContainer[i].cameradistance = -1.0f;
 	}
@@ -75,44 +71,134 @@ Particles::Particles(GLuint particleTexture, Shader* particleShader, glm::vec3 p
 	glGenBuffers(1, &particles_position_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
 	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
-	glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
 
 	// The VBO containing the colors of the particles
 	glGenBuffers(1, &particles_color_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
 	// Initialize with empty (NULL) buffer : it will be updated later, each frame.
-	glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
 
 }
 
 Particles::~Particles() {}
 
-void Particles::update(glm::vec3 move) {
+void Particles::spawn_at(glm::vec3 move, glm::vec3 color, glm::vec3 force, PART_TYPE type) {
+	if (move.x > BOX_SIDE_LENGTH/2.0f)
+		move.x = BOX_SIDE_LENGTH / 2.0001f;
+	else if(move.x < -BOX_SIDE_LENGTH / 2.0f)
+		move.x = -BOX_SIDE_LENGTH / 2.0f;
+	if (move.y > BOX_SIDE_LENGTH / 2.0f)
+		move.y = BOX_SIDE_LENGTH / 2.0001f;
+	else if (move.y < -BOX_SIDE_LENGTH / 2.0f)
+		move.y = -BOX_SIDE_LENGTH / 2.0f;
+
 	translation = move;
+	int particleIndex = findUnusedParticle();
+	if (particleIndex >= 0) {
+		Particle* p = &ParticlesContainer[particleIndex];
+		//grid->remove_part(p->pos.x, p->pos.y, particleIndex);
+		initParticle(*p, color, force, type);
+		grid->add_part(move.x, move.y, particleIndex);
+	}
 }
 
-void Particles::reinitParticle(Particle& p) {
-	p.life = 1.0f + (rand() % 2000) / 4000.0f;
+void Particles::update() {
+	float delta = 0.016f;
+
+	// calculate initial new position
+	for (int i = 0; i < MAX_PARTICLES; i++) {
+
+		Particle& p = ParticlesContainer[i]; // shortcut
+
+		if (p.life > delta) {
+				p.vel += p.force * (float)delta;
+				if (DEBUG)
+					cout << "index i : " << i << "vel " << " x " << p.vel.x << p.vel.y << endl;
+				p.new_pos = p.pos + p.vel * (float)delta;
+		}
+		else {
+			grid->remove_part(p.pos.x, p.pos.y, i);
+			p.cameradistance = -1.0f;
+			//reinitParticle(p);
+		}
+	}
+
+	for (int j = 0; j < SOLVER_ITER; j++) {
+		grid->calculate_lambda(ParticlesContainer);
+		grid->calculate_delta(ParticlesContainer);
+		for (int i = 0; i < MAX_PARTICLES; i++) {
+			Particle& p = ParticlesContainer[i]; // shortcut
+			if (p.life > delta && p.type == water) {
+				p.new_pos += p.delta;
+			}
+        }
+	}
+	grid->update_velocity(ParticlesContainer, delta);
+	//update vel and pos
+	ParticlesCount = 0;
+	for (int i = 0; i < MAX_PARTICLES; i++) {
+		Particle& p = ParticlesContainer[i]; // shortcut
+		if (p.life > delta) {
+			//for bin moving
+			float old_x = p.pos.x;
+			float old_y = p.pos.y;
+			int old_bin_x = floor((p.pos.x + (BOX_SIDE_LENGTH / 2)) / grid->bin_size);
+			int old_bin_y = floor((p.pos.y + (BOX_SIDE_LENGTH / 2)) / grid->bin_size);
+
+			Window::scene->container->in_box(&p);
+			p.pos = p.new_pos;
+
+			p.cameradistance = glm::length(p.pos - Window::scene->camera->cam_pos);
+			//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
+
+			// Fill the GPU buffer
+			g_particule_position_size_data[4 * ParticlesCount + 0] = p.pos.x;
+			g_particule_position_size_data[4 * ParticlesCount + 1] = p.pos.y;
+			g_particule_position_size_data[4 * ParticlesCount + 2] = p.pos.z;
+
+			g_particule_position_size_data[4 * ParticlesCount + 3] = p.size;
+
+			g_particule_color_data[4 * ParticlesCount + 0] = p.r;
+			g_particule_color_data[4 * ParticlesCount + 1] = p.g;
+			g_particule_color_data[4 * ParticlesCount + 2] = p.b;
+			g_particule_color_data[4 * ParticlesCount + 3] = p.a;
+
+			ParticlesCount++;
+			// update bin assignment if necessary
+			int new_bin_x = floor((p.pos.x + (BOX_SIDE_LENGTH / 2)) / grid->bin_size);
+			int new_bin_y = floor((p.pos.y + (BOX_SIDE_LENGTH / 2)) / grid->bin_size);
+
+			if (new_bin_x != old_bin_x || new_bin_y != old_bin_y) {
+				grid->remove_part(old_x, old_y, i);
+				grid->add_part(p.pos.x, p.pos.y, i);
+			}
+		}
+		p.life -= delta;
+	}
+	//cout << "pc" << ParticlesCount << endl;
+
+
+
+	
+}
+
+void Particles::initParticle(Particle& p, glm::vec3 color, glm::vec3 force, PART_TYPE type) {
+	p.life = PARTICLE_LIFE;
 	p.pos = translation;
+	p.new_pos = translation;
+	p.delta = { 0,0,0 };
+	p.force = force;
+	p.lambda = 0;
+	p.mass = 1;
+	p.vel = { 0,0,0 };
+	p.type = type;
+	p.r = color.r;
+	p.g = color.g;
+	p.b = color.b;
+	p.a = 255;
 
-	float spread = 3.0f;
-	glm::vec3 maindir = glm::vec3(0.0f, -1.0f, 0.0f);
-	glm::vec3 randomdir = glm::vec3(
-		(rand() % 2000 - 1000.0f) / 2000.0f,
-		(rand() % 2000 - 1000.0f) / 2000.0f,
-		0
-	);
-
-	p.speed = maindir + randomdir * spread;
-
-
-	// Very bad way to generate a random color
-	p.r = 225;
-	p.g = 190;
-	p.b = 163;
-	p.a = (rand() % 256) / 2 + 100;
-
-	p.size = (rand() % 1000) / 5000.0f + 0.2f;
+	p.size = PARTICLE_SIZE;
 }
 
 void Particles::draw() {
@@ -121,86 +207,15 @@ void Particles::draw() {
 	//GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	float delta = 0.016f;
-
-	int newparticles = (int)(delta*10000.0);
-	if (newparticles > (int)(0.016f*10000.0))
-		newparticles = (int)(0.016f*10000.0);
-
-	for (int i = 0; i<newparticles; i++) {
-		int particleIndex = FindUnusedParticle();
-		if(particleIndex >= 0)
-			reinitParticle(ParticlesContainer[particleIndex]);
-
-	}
-
-
-
-	// Simulate all particles
-	int ParticlesCount = 0;
-	for (int i = 0; i<MaxParticles; i++) {
-
-		Particle& p = ParticlesContainer[i]; // shortcut
-
-		if (p.life > 0.0f) {
-
-			// Decrease life
-			p.life -= delta;
-			if (p.life > 0.0f) {
-
-				// Simulate simple physics : gravity only, no collisions
-				p.speed += glm::vec3(0.0f, -4.81f, 0.0f) * (float)delta * 0.5f;
-				p.pos += p.speed * (float)delta;
-				p.cameradistance = glm::length2(p.pos - Window::scene->camera->cam_pos);
-				//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
-
-				// Fill the GPU buffer
-				g_particule_position_size_data[4 * ParticlesCount + 0] = p.pos.x;
-				g_particule_position_size_data[4 * ParticlesCount + 1] = p.pos.y;
-				g_particule_position_size_data[4 * ParticlesCount + 2] = p.pos.z;
-
-				g_particule_position_size_data[4 * ParticlesCount + 3] = p.size;
-
-				g_particule_color_data[4 * ParticlesCount + 0] = p.r;
-				g_particule_color_data[4 * ParticlesCount + 1] = p.g;
-				g_particule_color_data[4 * ParticlesCount + 2] = p.b;
-				g_particule_color_data[4 * ParticlesCount + 3] = p.a;
-
-			}
-			else {
-				// Particles that just died will be put at the end of the buffer in SortParticles();
-				p.cameradistance = -1.0f;
-				reinitParticle(p);
-			}
-
-			ParticlesCount++;
-
-		}
-		else {
-			p.cameradistance = -1.0f;
-			reinitParticle(p);
-		}
-	}
-
-	SortParticles();
-
-
-	//printf("%d ",ParticlesCount);
-
-
-	// Update the buffers that OpenGL uses for rendering.
-	// There are much more sophisticated means to stream data from the CPU to the GPU, 
-	// but this is outside the scope of this tutorial.
-	// http://www.opengl.org/wiki/Buffer_Object_Streaming
 
 	auto programID = shader->ID;
 
 	glBindBuffer(GL_ARRAY_BUFFER, particles_position_buffer);
-	glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+	glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
 	glBufferSubData(GL_ARRAY_BUFFER, 0, ParticlesCount * sizeof(GLfloat) * 4, g_particule_position_size_data);
 
 	glBindBuffer(GL_ARRAY_BUFFER, particles_color_buffer);
-	glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
+	glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW); // Buffer orphaning, a common way to improve streaming perf. See above link for details.
 	glBufferSubData(GL_ARRAY_BUFFER, 0, ParticlesCount * sizeof(GLubyte) * 4, g_particule_color_data);
 
 
@@ -259,22 +274,16 @@ void Particles::draw() {
 		(void*)0                          // array buffer offset
 	);
 
-	// These functions are specific to glDrawArrays*Instanced*.
-	// The first parameter is the attribute buffer we're talking about.
-	// The second parameter is the "rate at which generic vertex attributes advance when rendering multiple instances"
-	// http://www.opengl.org/sdk/docs/man/xhtml/glVertexAttribDivisor.xml
+
 	glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
 	glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
 	glVertexAttribDivisor(2, 1); // color : one per quad                                  -> 1
 
-	// Draw the particules !
-	// This draws many times a small triangle_strip (which looks like a quad).
-	// This is equivalent to :
-	// for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4), 
-	// but faster.
+	
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+
 }

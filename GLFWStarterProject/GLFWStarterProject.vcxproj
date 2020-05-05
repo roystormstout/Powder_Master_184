@@ -19,8 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Box2D.h" />
     <ClInclude Include="..\Camera.h" />
+    <ClInclude Include="..\GridNeighbor.h" />
+    <ClInclude Include="..\GUILayout.h" />
     <ClInclude Include="..\main.h" />
+    <ClInclude Include="..\NuklearInit.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\stb_image.h" />
     <ClInclude Include="..\texture.h" />
@@ -28,15 +32,19 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Box2D.cpp" />
     <ClCompile Include="..\Camera.cpp" />
+    <ClCompile Include="..\GridNeighbor.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\texture.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Particle.frag" />
-    <None Include="..\Particle.vert" />
+    <None Include="..\shaders\BoxShader.frag" />
+    <None Include="..\shaders\BoxShader.vert" />
+    <None Include="..\shaders\Particle.frag" />
+    <None Include="..\shaders\Particle.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

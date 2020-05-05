@@ -39,6 +39,18 @@
     <ClInclude Include="..\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Box2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GridNeighbor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUILayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NuklearInit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -59,13 +71,25 @@
     <ClCompile Include="..\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Box2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GridNeighbor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\Particle.frag">
+    <None Include="..\shaders\BoxShader.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\Particle.vert">
+    <None Include="..\shaders\Particle.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\shaders\Particle.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\shaders\BoxShader.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
