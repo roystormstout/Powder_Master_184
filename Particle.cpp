@@ -14,12 +14,8 @@ static GLfloat* g_particule_position_size_data = new GLfloat[MAX_PARTICLES * 4];
 static GLubyte* g_particule_color_data = new GLubyte[MAX_PARTICLES * 4];
 
 int LastUsedParticle = 0;
-//void SortParticles() {
-//	std::sort(&ParticlesContainer[0], &ParticlesContainer[MaxParticles]);
-//}
 
-// Finds a Particle in ParticlesContainer which isn't used yet.
-// (i.e. life < 0);
+
 int  Particles::findUnusedParticle() {
 
 	for (int i = LastUsedParticle; i< MAX_PARTICLES; i++) {
@@ -36,14 +32,14 @@ int  Particles::findUnusedParticle() {
 		}
 	}
 
-	return -1; // All particles are taken, override the first one
+	return -1; // All particles are taken, failed to create new particles
 }
 
-Particles::Particles(GLuint particleTexture, Shader* particleShader, glm::vec3 pos) {
+Particles::Particles(GLuint particleTexture, Shader* particleShader) {
 	this->ParticlesCount = 0;
 	grid = new GridNeighbor(PARTICLE_SIZE, BOX_SIDE_LENGTH);
 	this->shader = particleShader;
-	translation = pos;
+	translation = { 0,0,0 };
 	// Create and compile our GLSL program from the shaders
 	auto programID = shader->ID;
 	// Vertex shader
@@ -87,7 +83,7 @@ Particles::Particles(GLuint particleTexture, Shader* particleShader, glm::vec3 p
 
 Particles::~Particles() {}
 
-void Particles::move_to(glm::vec3 move) {
+void Particles::spawn_at(glm::vec3 move, glm::vec3 color, glm::vec3 force, PART_TYPE type) {
 	if (move.x > BOX_SIDE_LENGTH/2.0f)
 		move.x = BOX_SIDE_LENGTH / 2.0001f;
 	else if(move.x < -BOX_SIDE_LENGTH / 2.0f)
@@ -102,7 +98,7 @@ void Particles::move_to(glm::vec3 move) {
 	if (particleIndex >= 0) {
 		Particle* p = &ParticlesContainer[particleIndex];
 		//grid->remove_part(p->pos.x, p->pos.y, particleIndex);
-		reinitParticle(*p);
+		initParticle(*p, color, force, type);
 		grid->add_part(move.x, move.y, particleIndex);
 	}
 }
@@ -133,8 +129,7 @@ void Particles::update() {
 		grid->calculate_delta(ParticlesContainer);
 		for (int i = 0; i < MAX_PARTICLES; i++) {
 			Particle& p = ParticlesContainer[i]; // shortcut
-			if (p.life > delta) {
-				//need to check if delta is defined?
+			if (p.life > delta && p.type == water) {
 				p.new_pos += p.delta;
 			}
         }
@@ -188,30 +183,19 @@ void Particles::update() {
 	
 }
 
-void Particles::reinitParticle(Particle& p) {
+void Particles::initParticle(Particle& p, glm::vec3 color, glm::vec3 force, PART_TYPE type) {
 	p.life = PARTICLE_LIFE;
 	p.pos = translation;
 	p.new_pos = translation;
 	p.delta = { 0,0,0 };
-	p.force = { 0,-GRAVITY,0 };
+	p.force = force;
 	p.lambda = 0;
 	p.mass = 1;
-	float spread = 3.0f;
-	glm::vec3 maindir = glm::vec3(0.0f, -1.0f, 0.0f);
-	glm::vec3 randomdir = glm::vec3(
-		(rand() % 2000 - 1000.0f) / 2000.0f,
-		(rand() % 2000 - 1000.0f) / 2000.0f,
-		0
-	);
-	if(DEBUG)
-		p.vel = { 0,0,0 };
-	else
-		p.vel = maindir + randomdir*spread;
-
-	// Very bad way to generate a random color
-	p.r = rand() % 120 + 134;
-	p.g = rand() % 255;
-	p.b = rand() % 120+134;
+	p.vel = { 0,0,0 };
+	p.type = type;
+	p.r = color.r;
+	p.g = color.g;
+	p.b = color.b;
 	p.a = 255;
 
 	p.size = PARTICLE_SIZE;
@@ -290,19 +274,12 @@ void Particles::draw() {
 		(void*)0                          // array buffer offset
 	);
 
-	// These functions are specific to glDrawArrays*Instanced*.
-	// The first parameter is the attribute buffer we're talking about.
-	// The second parameter is the "rate at which generic vertex attributes advance when rendering multiple instances"
-	// http://www.opengl.org/sdk/docs/man/xhtml/glVertexAttribDivisor.xml
+
 	glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
 	glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
 	glVertexAttribDivisor(2, 1); // color : one per quad                                  -> 1
 
-	// Draw the particules !
-	// This draws many times a small triangle_strip (which looks like a quad).
-	// This is equivalent to :
-	// for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4), 
-	// but faster.
+	
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, ParticlesCount);
 
 	glDisableVertexAttribArray(0);

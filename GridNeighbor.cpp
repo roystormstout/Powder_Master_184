@@ -99,8 +99,7 @@ void GridNeighbor::calculate_lambda(Particle* parts) {
             bin_t& bin = grid[bin_x * num_bins + bin_y];
             for (auto pi = bin.begin(); pi != bin.end(); ++pi) {
                 int i = *pi;
-                if (DEBUG)
-                   cout << " i " << i << " in bin " << bin_x * num_bins + bin_y << endl;
+                
                 float density_i = 0.0f;
                 float density_0 = REST_DENSITY; 
                 for (int bi = top; bi <= bottom; ++bi) {
@@ -108,16 +107,11 @@ void GridNeighbor::calculate_lambda(Particle* parts) {
                         bin_t& curr_bin = grid[bi * num_bins + bj];
                         for (auto cit = curr_bin.begin(); cit != curr_bin.end(); ++cit) {
                             if (i != *cit) {
-                                if (DEBUG)
-                                    cout << "neighbor for i " << i << " are " << *cit << endl;
+                               
                                 glm::vec3 diff_ij = parts[i].new_pos - parts[*cit].new_pos;
                                 float y = W(diff_ij);
-                               /* glm::vec3 delta_y = -deltaW(diff_ij);
-                                multiplier += delta_y;*/
                                 density_i += parts[*cit].mass * y;
-                                //if (DEBUG)
-                                //    cout << "delta y for i " << i << " are " << delta_y.y << endl;
-                                //denom_sum += pow(glm::length((-delta_y * (1 / density_0))), 2);
+                               
                              
                             }
                         }
@@ -144,13 +138,11 @@ void GridNeighbor::calculate_lambda(Particle* parts) {
                 }
                 auto deltaC_i = multiplier_self * (1.0f / density_0);
                 denom_sum += pow(glm::length(deltaC_i), 2.0);
-                if (DEBUG) {
+                if (DEBUG && denom_sum > 0) {
                     cout << "part i and denom_sum " << i << "  " << denom_sum << " and Ci is " << C_i << endl;
                     
                 }
                 parts[i].lambda = -(C_i / (denom_sum+EPSILON));
-                if (DEBUG)
-                    cout << "part i and lambda" << i << "  " << parts[i].lambda << endl;
             }
         }
     }
@@ -180,8 +172,6 @@ void GridNeighbor::calculate_delta(Particle* parts) {
                         for (auto cit = curr_bin.begin(); cit != curr_bin.end(); ++cit) {
                             if (i != *cit) {
                                 glm::vec3 diff_ij = parts[i].new_pos - parts[*cit].new_pos;
-                                if (DEBUG)
-                                    cout << "part i and neighbor" << i << "  " << *cit << " diff=  " << diff_ij.x << diff_ij.y << endl;
                                 float s_corr = 0.0f;
                                 if (TENSILE_INSTABILITY) {
                                     float s_corr = pow(-CONST_K * (W(diff_ij) / W({ 0,DELTA_Q,0 } )), CONST_N);
@@ -192,8 +182,6 @@ void GridNeighbor::calculate_delta(Particle* parts) {
                     }
                 }
                 parts[i].delta = delta_p_i*(1.0f / (float)REST_DENSITY);
-                if (DEBUG)
-                    cout << "part i and delta" << i << "  " << delta_p_i.x << delta_p_i.y << endl;
             }
         }
     }
@@ -215,6 +203,9 @@ void GridNeighbor::update_velocity(Particle* parts, float delta) {
             bin_t& bin = grid[bin_x * num_bins + bin_y];
             for (auto pi = bin.begin(); pi != bin.end(); ++pi) {
                 int i = *pi;
+                //skip rock update
+                if (parts[i].type == rock)
+                    continue;
                 parts[i].vel = (parts[i].new_pos - (parts[i].pos)) / delta;
                 if (VORTICITY_EFFECT) {
                     glm::vec3 omega({ 0,0,0 });
@@ -222,7 +213,7 @@ void GridNeighbor::update_velocity(Particle* parts, float delta) {
                         for (int bj = left; bj <= right; ++bj) {
                             bin_t& curr_bin = grid[bi * num_bins + bj];
                             for (auto cit = curr_bin.begin(); cit != curr_bin.end(); ++cit) {
-                                if (i != *cit) {
+                                if (i != *cit && parts[i].type == parts[*cit].type) {
                                     glm::vec3 diff_ij = parts[i].new_pos - parts[*cit].new_pos;
                                     glm::vec3 vel_diff = parts[*cit].vel - parts[i].vel;
                                     omega += (vel_diff * deltaW(diff_ij));

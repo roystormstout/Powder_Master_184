@@ -22,7 +22,7 @@ void Scene::initialize_objects()
 	glm::mat4 toWorld(1.0f);
 
 	GLuint particleTexture = loadTexture("../resources/spark.png");
-	pe = new Particles(particleTexture, particleShader, { 0,0,0 });
+	pe = new Particles(particleTexture, particleShader);
 	container = new Box2D({ BOX_SIDE_LENGTH / 2,BOX_SIDE_LENGTH / 2,0 }, { -BOX_SIDE_LENGTH / 2,-BOX_SIDE_LENGTH / 2,0 }, boxShader);
 
 	lastFPSTime = glfwGetTime();
@@ -142,7 +142,7 @@ void Scene::idle_callback()
 		lastFPSTime += 1.0;
 	}
 	if (isSpawning && currentTime - lastSpawnTime >= 0.2f) {
-		pe->move_to(cursorWorldPos);
+		pe->spawn_at(cursorWorldPos, { 0,255,255 }, { 0,-GRAVITY,0 },water);
 		lastSpawnTime = currentTime;
 	}
 	camera->Update();
@@ -199,6 +199,9 @@ void Scene::mouse_button_callback(GLFWwindow* window, int button, int action, in
 	}
 	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 		isSpawning = false;
+	}
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && !isSpawning) {
+		pe->spawn_at(cursorWorldPos, { 181,138,94}, { 0,0,0 }, rock);
 	}
 
 }
