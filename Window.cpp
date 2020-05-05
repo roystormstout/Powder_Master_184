@@ -7,6 +7,7 @@
 const char* window_title = "184/284A Final Project";
 
 Particles* pe;
+Fluid* fluid;
 Scene* Window::scene = new Scene();
 struct nk_context* ctx;
 struct nk_colorf bg = { 0.1f,0.1f,0.1f,1.0f };
@@ -22,7 +23,8 @@ void Scene::initialize_objects()
 	glm::mat4 toWorld(1.0f);
 
 	GLuint particleTexture = loadTexture("../resources/spark.png");
-	pe = new Particles(particleTexture, particleShader);
+	fluid = new Fluid(width, height);
+	pe = new Particles(particleTexture, particleShader, fluid);
 	container = new Box2D({ BOX_SIDE_LENGTH / 2,BOX_SIDE_LENGTH / 2,0 }, { -BOX_SIDE_LENGTH / 2,-BOX_SIDE_LENGTH / 2,0 }, boxShader);
 
 	lastFPSTime = glfwGetTime();
@@ -153,6 +155,7 @@ void Scene::idle_callback()
 	}
 	camera->Update();
 	pe->update();
+	fluid->update(DELTA_TIME);
 	gui_status.curr_parts = pe->ParticlesCount;
 }
 
