@@ -17,6 +17,7 @@
 #include "Box2D.h"
 #define PART_VERT_SHADER_PATH "../shaders/Particle.vert"
 #define PART_FRAG_SHADER_PATH "../shaders/Particle.frag"
+#include "Fluid.h"
 
 #define BOX_VERT_SHADER_PATH "../shaders/BoxShader.vert"
 #define BOX_FRAG_SHADER_PATH "../shaders/BoxShader.frag"

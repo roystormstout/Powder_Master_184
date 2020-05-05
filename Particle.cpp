@@ -35,11 +35,12 @@ int  Particles::findUnusedParticle() {
 	return -1; // All particles are taken, failed to create new particles
 }
 
-Particles::Particles(GLuint particleTexture, Shader* particleShader) {
+Particles::Particles(GLuint particleTexture, Shader* particleShader, Fluid* f) {
 	this->ParticlesCount = 0;
 	grid = new GridNeighbor(PARTICLE_SIZE, BOX_SIDE_LENGTH);
 	this->shader = particleShader;
 	translation = { 0,0,0 };
+	bind_fluid(f);
 	// Create and compile our GLSL program from the shaders
 	auto programID = shader->ID;
 	// Vertex shader
@@ -104,18 +105,23 @@ void Particles::spawn_at(glm::vec3 move, glm::vec3 color, glm::vec3 force, PART_
 }
 
 void Particles::update() {
-	float delta = 0.016f;
 
 	// calculate initial new position
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 
 		Particle& p = ParticlesContainer[i]; // shortcut
 
-		if (p.life > delta) {
-				p.vel += p.force * (float)delta;
+		if (p.life > DELTA_TIME) {
+			if (p.type == water) {
+				//glm::vec3 new_force = fluid->get_vel(p.pos.x, p.pos.y) + p.force;
+				p.vel += p.force * (float)DELTA_TIME;
+				if(FLUID_ENABLED)
+					p.vel += fluid->get_vel(p.pos.x, p.pos.y)*FLUID_COEFF;
+			}
+				//p.vel += fluid->get_vel(p.pos[0], p.pos[1]);
 				if (DEBUG)
 					cout << "index i : " << i << "vel " << " x " << p.vel.x << p.vel.y << endl;
-				p.new_pos = p.pos + p.vel * (float)delta;
+				p.new_pos = p.pos + p.vel * (float)DELTA_TIME;
 		}
 		else {
 			grid->remove_part(p.pos.x, p.pos.y, i);
@@ -129,17 +135,17 @@ void Particles::update() {
 		grid->calculate_delta(ParticlesContainer);
 		for (int i = 0; i < MAX_PARTICLES; i++) {
 			Particle& p = ParticlesContainer[i]; // shortcut
-			if (p.life > delta && p.type == water) {
+			if (p.life > DELTA_TIME && p.type == water) {
 				p.new_pos += p.delta;
 			}
         }
 	}
-	grid->update_velocity(ParticlesContainer, delta);
+	grid->update_velocity(ParticlesContainer, DELTA_TIME);
 	//update vel and pos
 	ParticlesCount = 0;
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 		Particle& p = ParticlesContainer[i]; // shortcut
-		if (p.life > delta) {
+		if (p.life > DELTA_TIME) {
 			//for bin moving
 			float old_x = p.pos.x;
 			float old_y = p.pos.y;
@@ -148,7 +154,6 @@ void Particles::update() {
 
 			Window::scene->container->in_box(&p);
 			p.pos = p.new_pos;
-
 			p.cameradistance = glm::length(p.pos - Window::scene->camera->cam_pos);
 			//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
 
@@ -174,7 +179,7 @@ void Particles::update() {
 				grid->add_part(p.pos.x, p.pos.y, i);
 			}
 		}
-		p.life -= delta;
+		p.life -= DELTA_TIME;
 	}
 	//cout << "pc" << ParticlesCount << endl;
 
@@ -285,5 +290,9 @@ void Particles::draw() {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+}
 
+//TODO: this is kind of hacky, find a better way to expose fluid object
+void Particles::bind_fluid(Fluid* f) {
+	fluid = f;
 }

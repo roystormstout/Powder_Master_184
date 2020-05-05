@@ -49,6 +49,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\NuklearInit.h">
+          <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Fluid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -75,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\GridNeighbor.cpp">
+          <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Fluid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

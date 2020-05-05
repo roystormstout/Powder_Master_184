@@ -26,14 +26,19 @@
 #include <random>
 #include "texture.h"
 #include "shader.h"
+#include "fluid.h"
 
 enum PART_TYPE { water, rock };
 
 #define DEBUG false
+#define FLUID_ENABLED true
 #define BINNING_OPTIMIZED true
 #define TENSILE_INSTABILITY true
 #define VORTICITY_EFFECT false
 #define VISCOSITY_EFFECT true
+
+#define FLUID_COEFF 0.09
+#define DELTA_TIME 0.016f
 //particle config
 #define MAX_PARTICLES 300
 #define PARTICLE_SIZE 0.2
@@ -79,7 +84,8 @@ public:
 	Shader* shader;
 	glm::vec3 translation;
 	int ParticlesCount;
-	Particles(GLuint particleTexture, Shader* particleShader);
+	Fluid* fluid;
+	Particles(GLuint particleTexture, Shader* particleShader, Fluid* f);
 	~Particles();
 	int findUnusedParticle();
 	void spawn_at(glm::vec3 move, glm::vec3 color, glm::vec3 force, PART_TYPE type);
@@ -87,6 +93,7 @@ public:
 	void update();
 	void draw();
 	void initParticle(Particle& p, glm::vec3 color, glm::vec3 force, PART_TYPE type);
+	void bind_fluid(Fluid* fluid);
 	GLuint Texture;
 	GLuint billboard_vertex_buffer;
 	GLuint particles_position_buffer;
