@@ -23,7 +23,7 @@ void Scene::initialize_objects()
 	glm::mat4 toWorld(1.0f);
 
 	GLuint particleTexture = loadTexture("../resources/spark.png");
-	fluid = new Fluid(width, height);
+	fluid = new Fluid(FLUID_WIDTH, FLUID_HEIGHT);
 	pe = new Particles(particleTexture, particleShader, fluid);
 	container = new Box2D({ BOX_SIDE_LENGTH / 2,BOX_SIDE_LENGTH / 2,0 }, { -BOX_SIDE_LENGTH / 2,-BOX_SIDE_LENGTH / 2,0 }, boxShader);
 

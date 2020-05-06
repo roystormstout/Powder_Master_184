@@ -37,15 +37,19 @@ enum PART_TYPE { water, rock };
 #define VORTICITY_EFFECT false
 #define VISCOSITY_EFFECT true
 
-#define FLUID_COEFF 0.09
+#define FLUID_COEFF 0.5f
 #define DELTA_TIME 0.016f
+#define FLUID_ITER 5
+//number of fluid cells
+#define FLUID_HEIGHT 8
+#define FLUID_WIDTH 8
 //particle config
 #define MAX_PARTICLES 300
 #define PARTICLE_SIZE 0.2
 #define PARTICLE_LIFE 500
 #define REST_DENSITY 800
 #define PI 3.14159265
-#define GRAVITY 4.9
+#define GRAVITY 1
 #define SOLVER_ITER 3
 #define BOX_SIDE_LENGTH 6.0f
 #define EPSILON 100.0f

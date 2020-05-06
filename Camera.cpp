@@ -41,7 +41,7 @@ void Camera::Reset() {
 	Azimuth=0.0f;
 	Incline=0.0f;
 
-	cam_pos = glm::vec3(0.0f, 00.0f, -15.0f);
+	cam_pos = glm::vec3(0.0f, 00.0f, 15.0f);
 	cam_look_at = glm::vec3(0.0f, 0.0f, 0.0f);
 	cam_up = glm::vec3(0.0f, 1.0f, 0.0f);
 }

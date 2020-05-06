@@ -110,17 +110,21 @@ void Particles::update() {
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 
 		Particle& p = ParticlesContainer[i]; // shortcut
-
+		p.force = { 0, -GRAVITY, 0 };
 		if (p.life > DELTA_TIME) {
 			if (p.type == water) {
-				//glm::vec3 new_force = fluid->get_vel(p.pos.x, p.pos.y) + p.force;
+				if (FLUID_ENABLED) {
+					//simulate a drag force proportional to the square of velocity difference
+					glm::vec3 drag = (fluid->get_vel(p.pos.x, p.pos.y) - p.vel);
+					float magnitude = sqrt(drag.x * drag.x + drag.y * drag.y + drag.z * drag.z);
+
+					p.force += drag * magnitude;
+				}
+					
 				p.vel += p.force * (float)DELTA_TIME;
-				if(FLUID_ENABLED)
-					p.vel += fluid->get_vel(p.pos.x, p.pos.y)*FLUID_COEFF;
 			}
-				//p.vel += fluid->get_vel(p.pos[0], p.pos[1]);
 				if (DEBUG)
-					cout << "index i : " << i << "vel " << " x " << p.vel.x << p.vel.y << endl;
+					cout << "index i : " << i << "vel " << " x " << p.vel.x <<" y "<< p.vel.y << endl;
 				p.new_pos = p.pos + p.vel * (float)DELTA_TIME;
 		}
 		else {
