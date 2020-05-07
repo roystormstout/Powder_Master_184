@@ -163,7 +163,7 @@ void Scene::display_callback(GLFWwindow* window)
 {
 	auto vpMatrix = camera->GetViewProjectMtx();
 
-	glClearColor(0.3, 0.3, 0.3, 1.0);
+	glClearColor(0.2, 0.2, 0.2, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// Clear the color and depth buffers
 	
@@ -222,7 +222,7 @@ void Scene::mouse_button_callback(GLFWwindow* window, int button, int action, in
 		isSpawning = false;
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !isSpawning && type == rock) {
-		pe->spawn_at(cursorWorldPos, { 181,138,94}, { 0,0,0 }, rock);
+		pe->spawn_at(cursorWorldPos, { 230,178,134}, { 0,0,0 }, rock);
 	}
 
 }
